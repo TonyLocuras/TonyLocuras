@@ -1,249 +1,293 @@
-# OPERACIÓN REGRESO — "24H EN LA HAMACA"
-## 6 historias / 6 días + estructura de vídeo
+# EXPEDICIÓN 01 — "24H COLGADO EN LA PRESA"
+## Fundación del canal: 6 piezas de siembra + estructura del vídeo + cadencia
 Estado: BORRADOR. NADA PROGRAMADO. Esperando visto bueno.
 
 ---
 
-## PREMISA DEL VÍDEO
+## PREMISA
 
-**Título de trabajo:** 24 HORAS COLGADO DENTRO DE UNA MINA ABANDONADA
-**Set:** pozo vertical, minas de Rodalquilar. Hamaca de pared anclada a ~25-30 m de profundidad,
-suelo del pozo visible por debajo. Oscuridad total salvo frontal.
-**Formato:** POV crudo. GoPro 11 (pecho + casco), Action 5 Pro (plano fijo contrapicado desde abajo
-con batería externa), Mini 3 solo para la boca del pozo y el plano de salida al amanecer.
-**Duración objetivo:** 19-22 min. Ni uno más.
-
-### POR QUÉ ESTE VÍDEO Y NO OTRO
-Llevas 6 meses muertos. El algoritmo no te conoce. Un vídeo de "exploro una mina" no reactiva nada:
-es tu formato de siempre y la audiencia vieja ya no está suscrita emocionalmente.
-"24h colgado en el vacío dentro de un pozo" funciona porque:
-1. El título es un **contador**. El espectador sabe cuánto falta y quiere ver el final.
-2. El riesgo es **pasivo y acumulativo**, no un salto de 3 segundos. Eso da 20 min de tensión real,
-   no 20 min de relleno alrededor de un clip.
-3. Permite **dormir** en cámara. Dormir colgado en un pozo es la miniatura. Nadie se la salta.
+**Situación real:** pasado borrado. Cero vídeos, cero suscriptores, cero historial para el algoritmo.
+Esto no es un regreso. Es un **episodio 1 absoluto**, y hay que tratarlo como tal.
+**Set:** presa abandonada (Almería). Hamaca anclada en el **paramento vertical**, a media altura
+del muro, vacío por debajo. 24 horas sin bajar.
+**Formato:** POV crudo. GoPro 11 (pecho + casco), Action 5 Pro (plano fijo lateral a la hamaca,
+batería externa), Mini 3 para escala del muro, el plano de llegada y el amanecer.
+**Duración objetivo:** 18-21 min.
+**Cadencia:** un episodio cada 7-14 días.
 
 ---
 
-# PARTE 1 — LAS 6 HISTORIAS (D-6 → D-1)
+## LAS TRES CONSECUENCIAS DE HABER BORRADO TODO
 
-Reglas transversales:
-- Una historia principal al día. Subida entre **20:30 y 21:30** (hora de máximo consumo vertical).
-- Cero cara tuya hasta D-3. Que no sepan si estás bien, si has vuelto, si existes.
-- Ni una sola vez la palabra "vuelvo", "nuevo vídeo" o "estreno" antes de D-2. El anuncio mata el misterio.
-- Nunca enseñes la hamaca completa. Fragmentos. Un mosquetón, una cinta, una lona.
-- Sin música de librería en D-6 a D-4. Solo audio ambiente real. El silencio es el gancho.
+**1. Las historias se convierten en verticales públicos.**
+Una historia solo la ve quien ya te sigue. No tienes a quién. Las 6 piezas se publican como
+**Reels + TikTok + Shorts públicos** (mismo archivo, tres sitios) y además se fijan como destacado.
+El objetivo de las 6 piezas ya no es calentar a una audiencia vieja: es **fabricar una audiencia
+desde cero** para que el día del estreno el vídeo no salga a un desierto.
 
----
+**2. El título y la miniatura cargan el 90 % del peso.**
+Sin suscriptores no hay empujón inicial de campana. Las primeras 48 horas dependen solo del CTR
+a desconocidos en la pantalla de inicio. Cualquier concesión de claridad en la miniatura te cuesta
+el vídeo entero.
 
-## D-6 — "LA PRUEBA DE VIDA"
-**Objetivo:** romper 6 meses de silencio sin explicar nada. Que el comentario sea "¿está vivo?".
-**Visual:** plano fijo, vertical, 9 s. Mesa oscura. Solo entra luz de un flexo lateral.
-Sobre la mesa: un arnés con polvo de mina seco, un descensor, un frontal con la carcasa rayada.
-Tu mano entra en cuadro y coloca la cinta de anclaje al lado. Sale. Nada más se mueve.
-**Audio:** ambiente real de la habitación. Ni música ni voz.
-**Texto en pantalla:** nada. Cero texto.
-**Sticker:** ninguno.
-**Duración:** 9 s en bucle.
-**Prohibido:** tu cara, tu voz, cualquier referencia temporal, cualquier emoji.
-**Por qué funciona:** la ausencia de explicación obliga al swipe-up para ver tu perfil. Eso es lo
-que quieres: tráfico al canal, no un "me gusta".
+**3. El episodio 1 tiene que fundar un formato, no solo contar una historia.**
+Cadencia semanal significa ritual repetible. Lo que inventes aquí lo repites 50 veces.
 
 ---
 
-## D-5 — "LA COORDENADA"
-**Objetivo:** que la audiencia empiece a investigar. El espectador que investiga, vuelve.
-**Visual:** 3 frames seguidos, 4 s cada uno.
-1. Pantalla de móvil con mapa topográfico a oscuras. Un punto marcado en la sierra de Rodalquilar.
-   Tapa parcialmente el nombre con el pulgar. Que se intuya, que no se lea.
-2. Captura de una ficha minera antigua / plano de galería escaneado. Grano, fotocopia mala.
-   Un pozo marcado a bolígrafo rojo con una cifra: **-28 m**.
-3. Negro con una sola línea de texto.
-**Texto (solo frame 3):** `No se entra. Se cuelga.`
-**Audio:** ninguno en 1 y 2. En el 3, un golpe seco de metal (sonido real de mosquetón cerrando).
-**Sticker:** ninguno.
-**Prohibido:** decir Rodalquilar. Que lo digan ellos en comentarios. Eso es engagement gratis.
+## LA SERIE (hay que decidirlo antes de grabar, va quemado en los rótulos)
+
+Nombres, por orden de apuesta:
+1. **SIN RESCATE** — corto, se entiende sin explicación, promete la regla del formato
+   (nadie viene a por ti) y aguanta 50 episodios. **Mi apuesta.**
+2. **ZONA SECA** — más identidad Almería, menos tensión inmediata.
+3. **PROTOCOLO SECO** — suena a reto autoimpuesto, bueno para la cabecera, flojo en miniatura.
+
+**Ritual repetible del formato (esto es lo que fundas en el episodio 1):**
+- Rótulo de apertura siempre igual: `SIN RESCATE · EXPEDICIÓN 01 · LA PRESA`
+- **Un reloj en pantalla todo el vídeo.** En la presa el reloj es doble:
+  `HORA 00/24` + `VIENTO ?? km/h`. El viento es el contador de tensión de este episodio.
+- **Una regla declarada en voz alta en el primer minuto.** Aquí: no bajo en 24 horas.
+- **Cierre siempre idéntico:** la frase del episodio + una línea del siguiente destino. Sin "suscríbete" cantado.
 
 ---
 
-## D-4 — "EL MATERIAL QUE DA MIEDO"
-**Objetivo:** validar que es real y que es serio. Aquí es donde se cae la gente que cree que es montaje.
-**Visual:** POV en primera persona, 12 s, una sola toma. Estás revisando material en el suelo.
-La cámara en el pecho. Manos trabajando. Pasas cuerda por el descensor, tiras, compruebas.
-Al final de la toma, giras la mano y la cámara coge de refilón el bulto de la hamaca enrollada.
-Un segundo. No más.
-**Texto en pantalla (aparece en el segundo 8, abajo, pequeño):** `24 horas ahí dentro.`
-**Audio:** real. Roce de cuerda, clack del descensor, tu respiración. Sin música.
-**Sticker:** encuesta de 2 opciones, muy abajo para que no tape:
-`¿Aguanto?` → `Sí` / `Lo sacan de ahí`
-La encuesta aquí no es para medir nada. Es para que el usuario toque la pantalla.
-Un toque = señal de interés para la distribución de la historia.
-**Prohibido:** mostrar la hamaca montada, mostrar el pozo, dar fecha.
+# PARTE 1 — EL VÍDEO
+
+**Duración:** 20 min. **Retención objetivo:** 50 % a los 30 s, 38 % al minuto 3, 25 % al final.
+**Enemigo del episodio:** el viento. No la oscuridad, no la claustrofobia. En un muro de presa
+el peligro es la oscilación, la exposición y la radiación del hormigón. Toda la tensión sale de ahí.
+
+## COLD OPEN — 0:00 a 0:25
+Abre por el peor momento, no por el principio.
+- 0:00-0:08 — Action 5 Pro, plano lateral fijo: la hamaca **oscilando** contra el muro, de noche.
+  Racha de viento. El audio del viento saturando el micro. Tu voz, baja, sin dirigirte a nadie:
+  *"esto no para."*
+- 0:08-0:18 — POV: tu mano comprobando el anclaje en el hormigón a oscuras, el frontal buscando
+  el borde del paramento. Debajo, nada. El haz de luz **no llega al fondo**. Ese plano es el vídeo.
+- 0:18-0:25 — Negro. `HORA 15 · VIENTO 46 km/h`. Corte duro al muro a pleno día, dron, escala total.
+  `HORA 00 · VIENTO 8 km/h`.
+**Cero intro, cero logo, cero presentación, cero "bienvenidos" en los primeros 60 s.**
+No digas quién eres. Que se deduzca de lo que haces con las manos.
+
+## ACTO 1 — 0:25 a 4:30 · LA LLEGADA Y LA REGLA
+- Dron Mini 3: aproximación al coronamiento. El muro vacío, enorme, sin agua. 15 s de escala pura.
+  Esto es tu "establishing" y lo que vende el tamaño del problema.
+- Contrato en una frase, en off, mientras montas:
+  *"Un paramento de hormigón. Una hamaca a media altura. 24 horas sin pisar suelo.
+  No hay repisa, no hay salida lateral, y el viento aquí sube a partir de las tres de la tarde."*
+- Montaje del anclaje: **60 segundos máximo.** Dos anclajes independientes. Explicas el redundante
+  en 15 s y sigues. Te da autoridad y cierra la boca a los que van a decir que es montaje.
+- **Primera asomada al vacío desde el coronamiento.** POV mirando abajo, sin barandilla. 6 s de silencio.
+
+## ACTO 2 — 4:30 a 9:00 · COLGARSE
+La parte hipnótica. Aquí nacen los comentarios de "yo no podría".
+- Descenso por el paramento hasta la cota de la hamaca. POV continuo, sin cortes.
+- **Primer tumbado.** Plano lateral desde la Action 5. Silencio. Solo el hormigón y el aire.
+- Micro-cliffhanger: al soltar todo el peso la hamaca cede unos centímetros y gira.
+  Lo notas, lo dices, no lo dramatizas: *"eso es normal. Creo."*
+- Rótulo `HORA 02 · VIENTO 14 km/h`. El número empieza a subir. Que el espectador lo vigile.
+
+## ACTO 3 — 9:00 a 13:30 · EL CALOR Y EL ABURRIMIENTO
+Donde se cae la gente. Mátalo con **cambio de estímulo cada 60-80 s**: cambio de cámara, salto de
+rótulo, cambio de luz, sonido nuevo.
+- **El hormigón radia.** Plano de tu mano tocando el muro y retirándola. El sol de Almería pegando
+  en un paramento vertical sin sombra es el segundo enemigo del episodio. Explótalo visualmente.
+- Secuencia de **oscilación en ráfaga**: plano fijo lateral, la hamaca girando sobre el vacío,
+  40 segundos reales, sin música, sin voz. Es el plano más barato y el que más se comparte.
+- **HORA 09, minuto ~12:00 — VITASTRONG.**
+  En situación, nunca en pausa. Llevas nueve horas colgado, el muro te está asando, no puedes
+  gestionar comida sólida ahí y el agua está racionada. Lo dices **con las manos ocupadas,
+  mirando al vacío, no a cámara**. Máximo **25 segundos**. Código `tonylocura`, 20 %, una vez.
+  Rótulo discreto abajo 4 s y vuelves a la acción.
+  Prohibido: corte a plano de producto, etiqueta hacia cámara, "patrocinado por", cambio de tono.
+  La única justificación creíble de ese código es que es lo único que vas a meter en el cuerpo
+  en 24 horas. Esa es la que tienes. No la cambies por un primer plano del bote.
+
+## ACTO 4 — 13:30 a 17:00 · LA NOCHE Y LA HORA MALA
+- `HORA 12`. Caída de temperatura. Pasas de asarte a no poder parar de moverte. El contraste es relato.
+- Luz mínima, imagen sucia, grano. Que se vea mal. Lo sucio da verdad.
+- Intento de dormir. No duermes. Plano lateral del cuerpo colgado, inmóvil, 20 s reales.
+- **PICO, HORA 15:** aquí aterriza el cold open. La ráfaga. Ahora sí completo y sin cortes:
+  lo que en el segundo 0:08 fueron 10 segundos, aquí son **90**. El espectador ha esperado
+  quince minutos por esto. Págaselo entero.
+- `HORA 19 · 04:30` — la hora mala. Viento constante, no racheado. No pasa nada espectacular y por eso
+  funciona: es la parte donde solo aguantas. 60 segundos de aguantar, en una sola toma.
+
+## ACTO 5 — 17:00 a 20:00 · SALIR Y FUNDAR LA SERIE
+- `HORA 23`. Subida por el paramento. Agotado. Gestos imprecisos. Enséñalo, no lo esconda.
+- **Amanecer en el muro.** Del azul de noche al naranja sobre el hormigón. Corte duro, sobreexpón, que queme.
+- Dron: te alejas del coronamiento, un punto en una presa vacía. 10 s.
+- **Cierre, 25 segundos:** la frase real de lo que has aprendido colgado 24 horas de un muro,
+  y el siguiente destino en una línea (río Andarax, días sin agua ni comida).
+  El siguiente episodio es la llamada a la acción. Nada más.
 
 ---
 
-## D-3 — "LA PRIMERA VEZ QUE APARECES"
-**Objetivo:** reconexión humana. Después de 3 días de objetos, tu cara pega el doble de fuerte.
-**Visual:** selfie a cámara, frontal encendido, de noche, exterior, viento. 14 s. Sin corte.
-No estás arreglado. Vienes de cargar material. Respiración alta.
-Hablas mirando a cámara, en movimiento, andando.
-**Guion (literal, apréndetelo y dilo mal a propósito):**
-> "Seis meses. Vale. Me he pasado seis meses preparando una cosa que no sé si voy a poder terminar.
-> Mañana bajo. Y no subo hasta que pasen 24 horas. Eso es todo lo que os voy a decir."
-Corta en seco en "decir". Sin despedida, sin "dadle like". Corte brusco.
-**Texto en pantalla:** nada. Tu cara es el gancho.
-**Sticker:** ninguno. No contamines el primer contacto humano con un adhesivo.
-**Prohibido:** sonreír al final, pedir suscripciones, explicar dónde.
+## MINIATURA Y TÍTULO (lo que decide si el vídeo existe)
 
----
-
-## D-2 — "LA BOCA DEL POZO"
-**Objetivo:** vértigo. Esta es la historia que se comparte por DM.
-**Visual:** dron Mini 3, 10 s. Arranca cenital pegado al suelo sobre la boca del pozo —un agujero
-negro en la tierra, sin vallar— y hace un **push-in vertical descendente** hacia la oscuridad
-hasta que el encuadre es negro al 80 %. Sin música los primeros 6 s: solo el zumbido del dron,
-que se vuelve claustrofóbico cuando baja.
-**Texto en pantalha (entra cuando ya es casi todo negro):** `Mañana duermo aquí.`
-**Audio:** dron real. En el último segundo, corte a silencio absoluto. El silencio asusta más que un drop.
-**Sticker:** cuenta atrás nativa, puesta a la hora exacta del estreno.
-Primera y única mención de fecha en toda la campaña.
-**Prohibido:** música épica, texto largo, logo.
-
----
-
-## D-1 — "LA ÚLTIMA COMIDA" (aquí entra Vitastrong)
-**Objetivo:** cerrar la campaña y colocar el código sin olor a teletienda.
-**Visual:** POV, 15 s, dentro del coche o en el porche, de madrugada, material cargado detrás.
-Estás preparando la bolsa de lo que vas a meter en la hamaca. Vas metiendo cosas una a una
-en la bolsa estanca y las nombras sin mirar a cámara, como un inventario, rápido:
-frontal de repuesto, dos pilas, manta térmica, botella, y el producto Vitastrong.
-Cuando llegas al producto no cambias el tono ni el ritmo. Lo tratas como las pilas.
-**Guion (literal):**
-> "Frontal. Pilas. Manta. Agua, lo que cabe. Y esto, que es lo único que voy a meter en el cuerpo
-> en 24 horas, porque comida sólida ahí colgado no la voy a poder gestionar."
-Y sigues metiendo cosas. **No das el código en vídeo.** Que lo pidan.
-**Texto en pantalla (pequeño, abajo, los últimos 3 s):** `tonylocura · -20%`
-**Sticker:** enlace a Vitastrong. Un solo enlace.
-**Prohibido:** mirar a cámara al decirlo, decir "patrocinado por", decir "descuentazo",
-enseñar el producto en primer plano, sostenerlo con la etiqueta hacia cámara.
-**Por qué así:** el producto como herramienta de supervivencia, no como producto.
-La única justificación creíble del código es que lo necesitas para no morirte. Úsala.
-
----
-
-### MATRIZ DE LAS 6 HISTORIAS
-
-| Día | Pieza | Gancho | Cara | Voz | Lugar revelado | Fecha | Sticker |
-|-----|-------|--------|------|-----|----------------|-------|---------|
-| D-6 | Material sobre mesa | Silencio | No | No | No | No | — |
-| D-5 | Mapa + plano -28 m | Misterio | No | No | Insinuado | No | — |
-| D-4 | POV revisando cuerdas | Competencia | No | Respiración | No | No | Encuesta |
-| D-3 | Selfie nocturno | Humano | **Sí** | **Sí** | No | "Mañana" | — |
-| D-2 | Dron cayendo al pozo | Vértigo | No | No | **Sí** | **Sí** | Cuenta atrás |
-| D-1 | Inventario de bolsa | Cierre + código | POV | Sí | Sí | Hoy | Enlace |
-
-Curva buscada: silencio → intriga → credibilidad → persona → vértigo → acción.
-
----
-
-# PARTE 2 — ESTRUCTURA DEL VÍDEO
-
-**Duración:** 20 min. **Objetivo de retención:** 55 % a los 30 s, 40 % al minuto 3, 28 % al final.
-
-## COLD OPEN — 0:00 a 0:22 (lo más importante del vídeo)
-**NO empieces por el principio.** Abre con el peor momento de las 24 h.
-- 0:00-0:06 — Plano de la Action 5 Pro desde abajo: tú en la hamaca, a oscuras, el frontal
-  temblando, respiración muy corta. Tu voz, muy baja, sin dirigirte a nadie: *"se está moviendo."*
-- 0:06-0:14 — Corte a POV: tu mano agarrando la cinta de anclaje, el haz de luz buscando el techo
-  del pozo. Cae material. Sonido de piedra golpeando el fondo, tres segundos después.
-  **Ese retardo del impacto es el dato más brutal del vídeo. Que se oiga limpio.**
-- 0:14-0:22 — Negro. Texto: `HORA 19`. Corte a la boca del pozo a pleno día. Texto: `HORA 0`.
-**Regla:** cero logo, cero intro, cero "bienvenidos al canal" en los primeros 60 s. Nada.
-
-## ACTO 1 — 0:22 a 4:00 · EL DESCENSO
-Contrato con el espectador en una frase, en off, mientras bajas:
-*"Un pozo de 28 metros. Una hamaca a media altura. 24 horas. Si la cuerda baja, no hay forma de subir solo."*
-- Montaje del anclaje en la boca del pozo. Rápido. 40 s máximo. Nadie quiere ver nudos 3 minutos.
-- Descenso en POV continuo, sin cortes, mirando abajo. Cuando el frontal deja de alcanzar el fondo,
-  **deja 8 segundos sin hablar.** El vacío negro hace el trabajo.
-- Rótulo de profundidad en pantalla subiendo: -5 m, -12 m, -20 m, -28 m.
-
-## ACTO 2 — 4:00 a 8:30 · MONTAR LA CAMA EN EL VACÍO
-La parte más hipnótica y la que te da los comentarios de "no podría".
-- Montaje de la hamaca suspendida. Dos anclajes independientes. Explica el redundante **en 15 segundos**,
-  no en dos minutos: te da autoridad y cierra la boca a los que dirán que es montaje.
-- **Primer tumbado.** Plano contrapicado desde abajo. Silencio total. Solo goteo de agua del pozo.
-- Primer micro-cliffhanger: al soltar peso, la hamaca cede unos centímetros. Lo notas. Lo dices.
-  No lo dramatices. *"Eso es normal. Creo."*
-
-## ACTO 3 — 8:30 a 13:00 · EL ABURRIMIENTO Y LA CABEZA
-Aquí es donde se cae la gente. Mata el aburrimiento con **cambios de estímulo cada 60-80 s**:
-cambio de cámara, cambio de hora en rótulo, cambio de luz (apaga el frontal), sonido nuevo.
-- Secuencia **A OSCURAS TOTALES**. Apagas el frontal 40 segundos. Pantalla casi negra, solo tu voz
-  describiendo lo que oyes. Es el momento más barato y más potente del vídeo.
-- Murciélagos / sonidos sin fuente identificada. Buscas con el frontal. No encuentras nada.
-- **HORA 11, minuto ~11:30 — MENCIÓN VITASTRONG.** En situación, no en pausa:
-  llevas 11 horas colgado, estás agarrotado, y lo único que vas a meter en el cuerpo es eso.
-  Lo dices mientras lo haces, con las manos ocupadas, mirando al vacío, no a cámara.
-  Máximo **25 segundos**. Código `tonylocura`, 20 %, una vez. Ni rótulo gigante ni corte a producto.
-  Rótulo discreto abajo 4 s y sigues con la acción. Ese es el precio de que no suene a anuncio.
-
-## ACTO 4 — 13:00 a 16:30 · LA NOCHE
-- Rótulo `HORA 14`. Luz infrarroja / mínima. Imagen sucia. Que se vea mal. Lo sucio da verdad.
-- Intentas dormir. No duermes. Plano fijo desde abajo del cuerpo colgado, inmóvil, 20 s reales.
-- **Pico de tensión, HORA 19:** aquí aterriza el cold open. Desprendimiento de material desde arriba.
-  Ahora sí lo das completo y sin cortes. Lo que a los 0:06 fueron 8 segundos, aquí son 90.
-  El espectador ha esperado 19 minutos por esto. Págaselo.
-
-## ACTO 5 — 16:30 a 20:00 · SALIR
-- Hora 22-23. Subida en jumars. Agotado. Falta de precisión en los gestos. Enséñalo, no lo esconda.
-- Salida a la boca del pozo: **del negro absoluto al amanecer en Rodalquilar**. Corte duro.
-  Sobreexposición. Que queme. Es el premio visual.
-- Dron Mini 3: te alejas de la boca del pozo, un punto en la sierra. 10 s.
-- **Cierre en 20 segundos:** una frase real de lo que has aprendido colgado 24 h a oscuras,
-  y el anuncio del siguiente vídeo en una línea (río Andarax, sin agua, tantos días).
-  Nada de "suscríbete" cantado. El siguiente vídeo es la llamada a la acción.
-
----
-
-## MINIATURA Y TÍTULO
-
-**Miniatura:** contrapicado desde el fondo del pozo. Tú en la hamaca, suspendido, el frontal
-apuntando a cámara, y por encima de ti el círculo de luz de la boca del pozo, pequeño, muy arriba.
-Rostro visible, gesto de esfuerzo real, no de susto actuado. Texto quemado mínimo: `-28 m`.
-La profundidad es el gancho, no tu cara.
+**Miniatura:** a plena luz, no de noche. Plano de dron o lateral largo: el **muro de hormigón
+entero**, vacío, gris, y tú **minúsculo**, colgado de la hamaca a media altura. Rostro reconocible
+pero pequeño. Texto quemado mínimo: `24 HORAS`.
+La escala es el gancho, no tu cara. En la presa vendes tamaño; en una mina venderías claustrofobia.
+Haz **dos versiones** y cambia la que no funcione a las 48 h: una con `24 HORAS`, otra sin texto.
 
 **Títulos, por orden de apuesta:**
-1. `24 HORAS COLGADO DENTRO DE UNA MINA ABANDONADA`
-2. `DORMÍ 24 HORAS COLGADO A 28 METROS BAJO TIERRA`
-3. `ME COLGUÉ UNA HAMACA EN UN POZO MINERO Y PASÉ LA NOCHE`
-Descarta cualquier título con "(SALIÓ MAL)" o emojis. Lleva 6 meses sin publicar: necesita
-credibilidad, no clickbait de canal saturado.
+1. `24 HORAS COLGADO EN UNA PRESA ABANDONADA`
+2. `DORMÍ COLGADO EN EL MURO DE UNA PRESA ABANDONADA`
+3. `PASÉ 24 HORAS COLGADO DE UNA PRESA SIN BAJAR`
+Descarta emojis, mayúsculas sostenidas con "(SALIÓ MAL)" y cualquier promesa que el vídeo no pague.
+Canal de cero suscriptores: necesitas credibilidad, no clickbait de canal saturado.
 
-## CORTES VERTICALES (Shorts/Reels) — subir DESPUÉS del vídeo, no antes
-1. El retardo de la piedra cayendo al fondo (3 s de caída). 18 s.
-2. Los 40 segundos a oscuras totales. Cortado a 25 s.
-3. El push-in del dron a la boca del pozo + corte a ti en la hamaca. 12 s.
-4. Del negro al amanecer. 10 s.
+---
+
+# PARTE 2 — LAS 6 PIEZAS DE SIEMBRA (D-6 → D-1)
+
+Cambio respecto al plan anterior: **no son historias, son verticales públicos.**
+Cada pieza se publica en **Reels + TikTok + Shorts** (mismo archivo) y se fija como destacado.
+Objetivo: fabricar audiencia desde cero antes del estreno.
+
+Reglas transversales:
+- Una pieza al día. Publicación **20:30-21:30**.
+- Vertical 9:16, sin bordes, sin logo, texto quemado grande y arriba (no lo tape la interfaz).
+- **Primer fotograma siempre con el muro o el vacío.** Nunca tu cara en el frame 1: no te conoce nadie.
+- Cero menciones a "vuelvo", "nuevo canal", "estreno" antes de D-2.
+- Sin música de librería en D-6 a D-4. Viento y hormigón. El audio real es el gancho.
+- Cada pieza con el mismo rótulo de serie abajo: `SIN RESCATE · 01`. Repetición = marca.
+
+---
+
+## D-6 — "LA ESCALA"
+**Objetivo:** que un desconocido pare el scroll por el tamaño del sitio, no por ti.
+**Visual:** dron, 11 s, una sola toma. Arranca pegado al hormigón del paramento, textura, grietas,
+y hace un **retroceso continuo** hasta revelar la presa entera, vacía, sin una persona.
+En el último segundo, un punto rojo mínimo a media altura del muro: tu material ya anclado.
+**Texto (segundo 7, arriba):** `Aquí no hay nadie desde hace años.`
+**Audio:** viento real. Nada más.
+**Prohibido:** tu cara, tu voz, decir el nombre de la presa, música.
+
+## D-5 — "LA COTA"
+**Objetivo:** que investiguen. El que investiga, vuelve.
+**Visual:** 3 bloques de 4 s.
+1. Pantalla de móvil, mapa topográfico, un punto en la sierra. Tapas parcialmente el topónimo
+   con el pulgar. Que se intuya, que no se lea.
+2. Captura de una ficha técnica / plano antiguo del muro, fotocopia mala, grano. Una cota marcada
+   a bolígrafo rojo: **la altura del paramento**.
+3. Negro, una línea.
+**Texto (bloque 3):** `No se cruza. Se cuelga.`
+**Audio:** silencio en 1 y 2. En el 3, golpe seco de mosquetón cerrando.
+**Prohibido:** decir el nombre de la presa. Que lo digan ellos en comentarios: eso es alcance gratis.
+
+## D-4 — "EL MATERIAL"
+**Objetivo:** credibilidad técnica. Aquí se cae el que cree que es montaje.
+**Visual:** POV pecho, 13 s, toma única. Revisas material en el coronamiento, al atardecer, con viento.
+Manos trabajando: pasas cuerda, tiras del anclaje, compruebas, repites. Al final del movimiento
+la cámara coge **de refilón** el bulto de la hamaca enrollada. Un segundo. No más.
+**Texto (segundo 9, abajo):** `24 horas ahí colgado.`
+**Audio:** real. Roce de cuerda, clack del descensor, viento, tu respiración.
+**Prohibido:** hamaca montada, tu cara, fecha.
+
+## D-3 — "LA PRIMERA VEZ QUE TE VEN"
+**Objetivo:** convertir curiosidad en persona. Tres días de muro y material hacen que tu cara
+pegue el doble. Y en un canal nuevo, esta pieza es tu presentación entera.
+**Visual:** selfie a cámara, de noche, en el coronamiento, viento de verdad moviéndote el pelo y el micro.
+14 s, sin corte. No estás arreglado. Vienes de cargar material. Respiración alta.
+**Guion (apréndetelo y dilo mal a propósito):**
+> "He borrado todo lo que había hecho antes. Todo. Empiezo de cero y empiezo por aquí:
+> mañana me cuelgo de ese muro y no bajo en 24 horas. Eso es lo único que os voy a decir."
+Corta en seco en "decir". Sin despedida, sin pedir nada. Corte brusco.
+**Texto:** nada. Tu cara y esa frase.
+**Prohibido:** sonreír al final, pedir suscripciones, explicar por qué borraste nada más.
+**Nota:** "he borrado todo" es la frase más potente que tienes en toda la campaña. Úsala una vez,
+aquí, y no la repitas más. Repetida es excusa; dicha una vez es declaración.
+
+## D-2 — "EL VACÍO"
+**Objetivo:** vértigo. Esta es la que se manda por DM.
+**Visual:** 10 s. Arranca POV a ras del coronamiento, punteras en el borde, y bajas la mirada.
+Corte a **cenital del paramento** con dron: el muro cayendo a plomo, el fondo seco abajo, sin referencia
+de escala salvo tu silueta en el borde. Los primeros 6 s solo viento; cuando el dron baja,
+el zumbido se vuelve agobiante.
+**Texto (cuando el encuadre ya es todo hormigón):** `Mañana duermo ahí.`
+**Audio:** real. Último segundo: **silencio absoluto**. El silencio asusta más que un drop.
+**Sticker (solo en la versión destacada/historia):** cuenta atrás a la hora exacta del estreno.
+Primera y única mención de fecha de toda la campaña.
+**Prohibido:** música épica, texto largo, logo.
+
+## D-1 — "LA ÚLTIMA BOLSA" (aquí entra Vitastrong)
+**Objetivo:** cerrar la campaña y colocar el código sin olor a teletienda.
+**Visual:** POV, 15 s, madrugada, en el coche o en el porche, material cargado detrás.
+Vas metiendo cosas en la bolsa estanca de una en una y las nombras como un inventario, rápido,
+sin mirar a cámara: frontal, pilas, manta térmica, el agua que cabe, y el producto Vitastrong.
+Cuando llegas al producto **no cambias el tono ni el ritmo**. Lo tratas como las pilas.
+**Guion:**
+> "Frontal. Pilas. Manta. El agua que entre, que no es mucha. Y esto, que es lo único que voy
+> a meter en el cuerpo en 24 horas, porque comida sólida colgado de un muro no la voy a poder gestionar."
+Y sigues metiendo cosas. **No cantes el código en voz alta.** Que lo pidan.
+**Texto (pequeño, abajo, últimos 3 s):** `tonylocura · -20%`
+**Enlace:** uno solo, en bio y en el destacado.
+**Prohibido:** mirar a cámara al decirlo, "descuentazo", primer plano del bote, etiqueta a cámara.
+
+---
+
+### MATRIZ DE LAS 6 PIEZAS
+
+| Día | Pieza | Gancho | Frame 1 | Cara | Voz | Sitio revelado | Fecha |
+|-----|-------|--------|---------|------|-----|----------------|-------|
+| D-6 | Dron: escala del muro | Tamaño | Hormigón | No | No | No | No |
+| D-5 | Mapa + cota a bolígrafo | Misterio | Pantalla | No | No | Insinuado | No |
+| D-4 | POV revisando cuerdas | Competencia | Manos | No | Respiración | No | No |
+| D-3 | Selfie: "he borrado todo" | Persona | Tu cara | **Sí** | **Sí** | No | "Mañana" |
+| D-2 | Cenital del paramento | Vértigo | Punteras en el borde | No | No | **Sí** | **Sí** |
+| D-1 | Inventario de la bolsa | Cierre + código | Bolsa | POV | Sí | Sí | Hoy |
+
+Curva: escala → intriga → credibilidad → persona → vértigo → acción.
+
+---
+
+## VERTICALES DE EXPLOTACIÓN (después del estreno, nunca antes)
+1. La ráfaga de la hora 15, cortada a 20 s. **La más fuerte.**
+2. Los 40 s de oscilación sobre el vacío, cortados a 25 s.
+3. El retroceso del dron revelando la presa entera + corte a ti colgado. 12 s.
+4. Del azul de noche al amanecer sobre el hormigón. 10 s.
+5. La mano tocando el hormigón hirviendo y retirándola. 8 s.
 Cada uno con el título del vídeo largo fijado en el primer comentario.
 
 ---
 
-## VARIANTE PRESA (si la hamaca va en la presa abandonada, no en el pozo)
-Cambian tres cosas y el resto se mantiene:
-1. **D-2** no es un dron cayendo a un agujero: es un plano a ras del coronamiento y después un
-   cenital del paramento vertical con la lámina de agua / el fondo seco abajo.
-2. **El acto a oscuras desaparece** y lo sustituye el **viento**, que es el enemigo real en la presa:
-   la hamaca oscila, la oscilación es el reloj de tensión, y el rótulo pasa de profundidad a
-   velocidad de viento.
-3. **La miniatura es a plena luz**, no negra: silueta colgada en un muro de hormigón enorme y vacío.
-   Más escala, menos claustrofobia. Funciona mejor en impresiones, peor en comentarios.
-Dime cuál es y lo reescribo entero sobre esa variante.
+# PARTE 3 — LOGÍSTICA Y CADENCIA
+
+**El riesgo de la cadencia es el que te mata el canal, no la presa.**
+Prometer un episodio cada 7-14 días con cero colchón de material es cómo mueren los canales que
+vuelven. Lo que hay que hacer, en este orden:
+
+1. **Graba la presa (Expedición 01).** 24 h + día de aproximación y recogida.
+2. **Antes de publicar el 01, graba el 02** (Andarax o Tabernas). Ya tienes la tarjeta llena cuando
+   el 01 esté subiendo. Eso es lo único que te garantiza no romper la cadencia en la semana 3,
+   que es cuando se rompe siempre.
+3. **Monta el 01 en bloque aislado.** Primer corte a 26-28 min y recorta hasta 20. Lo que dudes, fuera.
+4. **Las 6 piezas se editan de lo grabado el día de aproximación**, no del material de las 24 h,
+   salvo D-6 (dron) y D-2 (cenital). Así no quemas nada del vídeo largo en la siembra.
+5. **Cadencia declarada: cada 14 días.** No prometas 7. Si entregas a 7, ganas; si prometes 7 y
+   entregas a 14, pierdes. Entrega antes de lo prometido, nunca al revés.
+
+**Calendario (relativo al estreno E):**
+| Momento | Acción |
+|---------|--------|
+| E-21 | Grabación Expedición 01 (presa) |
+| E-14 | Grabación Expedición 02 (Andarax / Tabernas) |
+| E-12 a E-7 | Montaje 01 + edición de las 6 piezas |
+| E-6 a E-1 | Publicación diaria de las 6 piezas (20:30-21:30) |
+| **E** | Estreno Expedición 01 |
+| E+1 a E+5 | Verticales de explotación, uno al día |
+| E+14 | Estreno Expedición 02 |
 
 ---
 
-## ESTADO DE PROGRAMACIÓN
-- [ ] Confirmar set: POZO RODALQUILAR / PRESA
-- [ ] Confirmar fecha de estreno (define D-6 a D-1)
-- [ ] Visto bueno a las 6 historias
-- [ ] Visto bueno a la estructura de vídeo
+## DECISIONES PENDIENTES
+- [ ] Nombre de la serie (apuesta: **SIN RESCATE**) — va quemado en todos los rótulos
+- [ ] Qué presa (determina altura real de paramento, viento dominante y hora del amanecer en el muro)
+- [ ] Cadencia declarada: 14 días (recomendado) o 7
+- [ ] Fecha de estreno E — fija todo el calendario
+- [ ] Visto bueno a las 6 piezas
+- [ ] Visto bueno a la estructura del vídeo
 - [ ] **Programar en Metricool — NO HACER HASTA ORDEN EXPRESA**
