@@ -1,0 +1,139 @@
+<!doctype html><meta charset="utf-8">
+<!-- ============================================================
+     RÓTULO ANIMADO — SIN RESCATE
+     Edita SOLO el bloque CONFIG. Luego: node render.js
+     ============================================================ -->
+<script>
+window.CONFIG = {
+  // ---- TEXTO ----
+  eyebrow : "SIN RESCATE · EXPEDICIÓN 01 · LA PRESA",
+  titulo  : "HORA 15",
+  dato    : "VIENTO 46 KM/H",
+  pie     : "La ráfaga",
+
+  // ---- FONDO ----
+  fondo       : "#0B0B0C",   // color plano
+  fondoImagen : "",          // ruta a un .jpg/.png y tapa el color. Ej: "muro.jpg"
+  fondoOscuro : 0.55,        // 0–1, cuánto oscurece la imagen de fondo
+  vineta      : 0.55,        // 0–1
+  grano       : 0.055,       // 0 = limpio
+
+  // ---- COLOR ----
+  tinta  : "#F4F2EE",
+  acento : "#E2541C",
+  gris   : "#8A8578",
+
+  // ---- TIPOGRAFÍA (px sobre lienzo 1920×1080) ----
+  cpEyebrow : 21,
+  cpTitulo  : 208,
+  cpDato    : 62,
+  cpPie     : 28,
+
+  // ---- TIEMPOS (segundos) ----
+  fps       : 25,
+  duracion  : 3.0,
+  t : { eyebrow:0.10, titulo:0.32, regla:0.45, dato:0.60, pie:0.85, salida:2.70 },
+
+  // ---- TRANSICIÓN DE ENTRADA DEL TÍTULO ----
+  transicion : "slam",   // "slam" | "fade" | "wipe" | "persiana"
+  flash      : true,     // destello blanco de 2 fotogramas en el impacto
+  salida     : "fundido",// "fundido" | "corte"
+
+  // ---- AUDIO ----
+  audio : { impacto:true, viento:true, volImpacto:0.95, volViento:0.50 }
+};
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+#esc{position:relative;width:1920px;height:1080px;overflow:hidden}
+#bg,#bgimg{position:absolute;inset:0}
+#bgimg{background-size:cover;background-position:center}
+#scrim,#vig,#grain,#flash{position:absolute;inset:0;pointer-events:none}
+#grain{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+#flash{background:#fff;opacity:0}
+#col{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+#eyebrow{font-weight:600;text-transform:uppercase}
+#tituloWrap{overflow:hidden}
+#titulo{font-weight:900;letter-spacing:-.02em;text-transform:uppercase;line-height:.86}
+#regla{height:4px;margin:42px auto}
+#dato{font-weight:800;text-transform:uppercase;line-height:1}
+#pie{font-weight:600}
+</style>
+<div id="esc">
+  <div id="bg"></div><div id="bgimg"></div><div id="scrim"></div>
+  <div id="col">
+    <div id="eyebrow"></div>
+    <div id="tituloWrap"><div id="titulo" class="num"></div></div>
+    <div id="regla"></div>
+    <div id="dato" class="num"></div>
+    <div id="pie"></div>
+  </div>
+  <div id="vig"></div><div id="grain"></div><div id="flash"></div>
+</div>
+<script>
+// overrides desde la query string (los usa render.js)
+try{ const q=new URLSearchParams(location.search).get('o');
+     if(q) Object.assign(window.CONFIG, JSON.parse(q)); }catch(e){}
+const C = window.CONFIG, $ = s => document.querySelector(s);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const oExpo=x=>x>=1?1:1-Math.pow(2,-10*x);
+const oCubic=x=>1-Math.pow(1-x,3);
+// progreso 0→1 de un elemento que arranca en t0 y dura d
+const P=(t,t0,d)=>clamp((t-t0)/d,0,1);
+
+$('#bg').style.background = C.fondo;
+if (C.fondoImagen){ $('#bgimg').style.backgroundImage=`url("${C.fondoImagen}")`;
+  $('#scrim').style.background=`rgba(0,0,0,${C.fondoOscuro})`; } else { $('#bgimg').style.display='none'; }
+$('#vig').style.background=`radial-gradient(ellipse 72% 62% at 50% 50%,transparent 40%,rgba(0,0,0,${C.vineta}) 100%)`;
+$('#grain').style.opacity=C.grano;
+$('#eyebrow').textContent=C.eyebrow; $('#eyebrow').style.cssText+=`font-size:${C.cpEyebrow}px;color:${C.acento}`;
+$('#titulo').textContent=C.titulo;   $('#titulo').style.cssText+=`font-size:${C.cpTitulo}px;color:${C.tinta}`;
+$('#dato').textContent=C.dato;       $('#dato').style.cssText+=`font-size:${C.cpDato}px;color:${C.tinta};opacity:.72`;
+$('#pie').textContent=C.pie;         $('#pie').style.cssText+=`font-size:${C.cpPie}px;color:${C.gris};margin-top:30px`;
+$('#regla').style.background=C.acento;
+
+window.setT = function(t){
+  const T=C.t;
+  // eyebrow: fade + letterspacing que cierra
+  const pe=oCubic(P(t,T.eyebrow,0.34));
+  $('#eyebrow').style.opacity=pe;
+  $('#eyebrow').style.letterSpacing=(0.34+(1-pe)*0.22).toFixed(3)+'em';
+
+  // título
+  const pt=P(t,T.titulo,0.42), e=oExpo(pt);
+  const ti=$('#titulo');
+  if(C.transicion==='slam'){ ti.style.opacity=pt>0?1:0;
+    ti.style.transform=`translateY(${(1-e)*0.42*C.cpTitulo}px) scale(${1+(1-e)*0.055})`;
+    ti.style.clipPath=`inset(0 0 ${(1-e)*100}% 0)`; }
+  else if(C.transicion==='fade'){ ti.style.opacity=oCubic(P(t,T.titulo,0.5)); ti.style.transform='none'; ti.style.clipPath='none'; }
+  else if(C.transicion==='wipe'){ ti.style.opacity=pt>0?1:0; ti.style.transform='none';
+    ti.style.clipPath=`inset(0 ${(1-e)*100}% 0 0)`; }
+  else { ti.style.opacity=pt>0?1:0; ti.style.transform='none';           // persiana
+    const n=6,s=[];for(let i=0;i<n;i++){const p=clamp((e*1.5)-(i*0.08),0,1);
+      s.push(`inset(${i*100/n}% 0 ${100-(i+1)*100/n}% ${(1-p)*100}%)`);}
+    ti.style.clipPath=s.join(''); ti.style.clipPath=`inset(0 ${(1-e)*100}% 0 0)`; }
+
+  // flash de impacto (2 fotogramas)
+  const df=t-T.titulo;
+  $('#flash').style.opacity = (C.flash && df>=0 && df<2/C.fps) ? 0.075 : 0;
+
+  // regla que se abre desde el centro
+  $('#regla').style.width=(oExpo(P(t,T.regla,0.40))*200).toFixed(1)+'px';
+
+  // dato y pie
+  const pd=oCubic(P(t,T.dato,0.38));
+  $('#dato').style.opacity=(pd*0.72).toFixed(3);
+  $('#dato').style.transform=`translateY(${(1-pd)*16}px)`;
+  const pp=oCubic(P(t,T.pie,0.40));
+  $('#pie').style.opacity=pp; $('#pie').style.transform=`translateY(${(1-pp)*10}px)`;
+
+  // grano respirando + salida
+  $('#grain').style.backgroundPosition=`${(t*613)%200}px ${(t*417)%200}px`;
+  const out = C.salida==='corte' ? 1 : 1-oCubic(P(t,T.salida,C.duracion-T.salida));
+  $('#esc').style.opacity=out;
+};
+window.setT(0);
+</script>
