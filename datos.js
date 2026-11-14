@@ -1,16 +1,16 @@
 // Este archivo lo crea el panel (admin.html). Lo más cómodo es cambiar la web desde ahí.
-// Última actualización: 14/11/2026, 4:31:38
+// Última actualización: 14/11/2026, 4:43:26
 
 const DATOS = {
   "promociones": [
     {
       "activa": true,
       "etiqueta": "BLACK FRIDAY",
-      "titulo": "20 % extra en Vitastrong",
+      "titulo": "Hasta el 30% de DESCUENTO en Vitastrong",
       "texto": "Se suma a mi código tonylocura. Aprovecha antes de que se acabe.",
       "boton": "Aprovechar ahora",
       "enlace": "https://vitastrong.es/?coupon=Tonylocura",
-      "hasta": "2026-11-30",
+      "hasta": "2026-11-15",
       "extraEnPacks": 20
     }
   ],
