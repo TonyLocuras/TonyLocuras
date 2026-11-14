@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel TonyLocuras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#d8d2c4;--card:#e9e5da;--ink:#17140f;--muted:#5b554b;--line:#c4bdac;--red:#c2321d;--green:#2f7d3a;--white:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:Barlow,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;padding-bottom:110px}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+.top{position:sticky;top:0;z-index:5;background:var(--ink);color:var(--white);display:flex;align-items:center;gap:10px;padding:12px 16px}
+.top b{font-family:"Barlow Condensed",sans-serif;font-size:22px;flex:1}
+.top a,.top button{color:var(--white);background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;text-decoration:none}
+.wrap{max-width:620px;margin:0 auto;padding:18px 16px}
+h1,h2{font-family:"Barlow Condensed",sans-serif;line-height:1.1}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:16px}
+.sec>h2{font-size:28px}
+.sub{color:var(--muted);font-size:14px;margin:2px 0 12px}
+.f{display:block;margin:12px 0}
+.f>span{display:block;font-weight:600;font-size:15px;margin-bottom:4px}
+.f small,.sw small{display:block;color:var(--muted);font-size:13px;margin-top:4px;font-weight:400}
+input[type=text],input[type=url],input[type=date],textarea{width:100%;font:16px Barlow,sans-serif;color:var(--ink);background:var(--white);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+textarea{resize:vertical}
+input:focus,textarea:focus{outline:2px solid var(--red);border-color:transparent}
+input.bad{outline:2px solid var(--red);background:#fde9e5}
+.sw{display:flex;gap:12px;align-items:center;margin:8px 0 4px;cursor:pointer}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.sw i{flex:none;width:50px;height:30px;border-radius:999px;background:#b9b1a0;position:relative;transition:background .2s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--white);transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sw input:checked+i{background:var(--green)}
+.sw input:checked+i::after{transform:translateX(20px)}
+.sw span{font-weight:600}
+.card{background:var(--white);border:1px solid var(--line);border-radius:14px;margin:10px 0;overflow:hidden}
+.card.inner{background:#f7f5ef}
+.card>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer}
+.card>summary::-webkit-details-marker{display:none}
+.chev::before{content:"Editar";font-size:13px;font-weight:600;color:var(--red)}
+.card[open]>summary .chev::before{content:"Cerrar"}
+.card[open]>summary{border-bottom:1px solid var(--line)}
+.sum{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.sum b{font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip{align-self:flex-start;font-style:normal;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;background:#e6e1d4;color:var(--muted)}
+.chip.on{background:#dcefdc;color:var(--green)}
+.chip.off{background:#eee;color:#8a8478}
+.body{padding:4px 14px 14px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tools button{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:600}
+.tools button:disabled{opacity:.35;cursor:default}
+.tools .del,.ghost.del{color:var(--red);border-color:#e3b3aa}
+.add{display:block;width:100%;margin-top:10px;background:transparent;border:2px dashed var(--red);color:var(--red);border-radius:12px;padding:12px;font-weight:600;font-size:16px}
+.ghost{display:block;width:100%;margin-top:14px;background:transparent;border:1px solid var(--line);border-radius:12px;padding:10px;font-weight:600}
+.empty{color:var(--muted);text-align:center;padding:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+.tabchip{border:1px solid var(--line);background:var(--white);border-radius:999px;padding:8px 14px;font-weight:600;font-size:15px}
+.tabchip.on{background:var(--red);color:var(--white);border-color:var(--red)}
+.tabchip.addt{border-style:dashed;color:var(--red)}
+.savebar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--white);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.savebar .in{max-width:620px;margin:0 auto;display:flex;gap:12px;align-items:center}
+#status{flex:1;font-size:14px;font-weight:600;color:var(--muted)}
+#status.dirty{color:#a86b00}
+#status.ok{color:var(--green)}
+#status.bad{color:var(--red)}
+#save{background:var(--red);color:var(--white);border:0;border-radius:12px;padding:14px 18px;font-size:16px;font-weight:700;white-space:nowrap}
+#save:disabled{opacity:.4;cursor:default}
+.setup h1{font-size:34px;margin-bottom:6px}
+.setup ol{margin:14px 0 14px 20px}
+.setup li{margin:8px 0}
+.setup .big{display:block;text-align:center;background:var(--ink);color:var(--white);text-decoration:none;font-weight:700;border-radius:12px;padding:13px;margin:12px 0}
+.setup button.main{width:100%;background:var(--red);color:var(--white);border:0;border-radius:12px;padding:14px;font-size:17px;font-weight:700;margin-top:8px}
+.msg{border-radius:12px;padding:12px 14px;margin-bottom:14px;font-weight:600}
+.msg.bad{background:#fde9e5;color:var(--red)}
+.msg.info{background:#fff4d6;color:#7a5200}
+code{background:#eee8da;border-radius:5px;padding:1px 5px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top">
+  <b>Panel TonyLocuras</b>
+  <a href="./" target="_blank" rel="noopener">Ver web ↗</a>
+  <button id="logout" hidden>Salir</button>
+</header>
+<main class="wrap" id="app"><p class="empty">Cargando…</p></main>
+<footer class="savebar" id="savebar" hidden>
+  <div class="in"><span id="status"></span><button id="save" disabled>Guardar y publicar</button></div>
+</footer>
+
+<script>
+// Dónde está tu web en GitHub (se detecta solo cuando el panel está publicado).
+const OWNER_DEF = "tonylocuras", REPO_DEF = "TonyLocuras", FILE = "datos.js";
+
+const onPages = location.hostname.endsWith(".github.io");
+const OWNER = onPages ? location.hostname.split(".")[0] : OWNER_DEF;
+const firstSeg = location.pathname.split("/").filter(Boolean)[0] || "";
+const REPO = onPages ? (firstSeg && !firstSeg.includes(".") ? firstSeg : OWNER + ".github.io") : REPO_DEF;
+
+const $ = s => document.querySelector(s);
+const app = $("#app"), saveBtn = $("#save"), statusEl = $("#status");
+let S = null, sha = null, branch = "main", token = null, dirty = false, tabSel = 0;
+const open = new Set();
+
+const store = {
+  get() { try { return localStorage.getItem("tl_token"); } catch { return null; } },
+  set(v) { try { localStorage.setItem("tl_token", v); } catch {} },
+  del() { try { localStorage.removeItem("tl_token"); } catch {} }
+};
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const eur = n => n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+const r2 = n => Math.round(n * 100) / 100;
+const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), c => c.charCodeAt(0)));
+const b64enc = s => { let bin = ""; new TextEncoder().encode(s).forEach(b => bin += String.fromCharCode(b)); return btoa(bin); };
+
+// ---------------- GitHub ----------------
+async function gh(path, opts = {}) {
+  const r = await fetch("https://api.github.com/repos/" + OWNER + "/" + REPO + path, {
+    cache: "no-store", ...opts,
+    headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", ...(opts.body ? { "Content-Type": "application/json" } : {}) }
+  });
+  if (!r.ok) { const e = new Error("HTTP " + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+function errMsg(e) {
+  if (e.status === 401) return "La llave de GitHub no funciona o ha caducado. Pulsa Salir y pega una nueva.";
+  if (e.status === 403 || e.status === 404) return "La llave no tiene permiso para guardar en " + REPO + ". Revisa que tenga Contents: Read and write.";
+  if (e.status === 409 || e.status === 422) return "El archivo cambió desde otro sitio. Recarga la página y vuelve a hacer el cambio.";
+  return "No se pudo conectar. Revisa tu internet y prueba otra vez.";
+}
+
+// ---------------- Pantalla de conexión (solo la primera vez) ----------------
+function setup(error) {
+  $("#savebar").hidden = true; $("#logout").hidden = true;
+  app.innerHTML = `
+  <section class="sec setup">
+    ${error ? `<div class="msg bad">${esc(error)}</div>` : ""}
+    <h1>Conecta el panel (solo una vez)</h1>
+    <p class="sub">Necesitas una "llave" de tu GitHub para que el panel pueda guardar los cambios en tu web. Se queda guardada en este móvil u ordenador. Tarda 1 minuto.</p>
+    <a class="big" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">1. Abrir GitHub para crear la llave ↗</a>
+    <ol>
+      <li><b>Token name:</b> escribe <code>Panel web</code>.</li>
+      <li><b>Expiration:</b> elige la fecha más lejana que te deje (cuando caduque, el panel te avisa y repites esto).</li>
+      <li><b>Repository access:</b> marca <b>Only select repositories</b> y elige <b>${esc(REPO)}</b>.</li>
+      <li><b>Permissions:</b> busca <b>Contents</b> y ponlo en <b>Read and write</b>.</li>
+      <li>Abajo pulsa <b>Generate token</b> y copia la llave (empieza por <code>github_pat_</code>).</li>
+    </ol>
+    <label class="f"><span>2. Pega aquí la llave</span><input type="text" id="tok" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_..."></label>
+    <button class="main" id="connect">Conectar</button>
+    <p class="sub" style="margin-top:12px">No compartas esta llave con nadie: con ella se puede cambiar tu web.</p>
+  </section>`;
+  $("#connect").onclick = () => {
+    const v = $("#tok").value.trim();
+    if (!v) return;
+    token = v; store.set(v); load();
+  };
+}
+
+// ---------------- Cargar datos ----------------
+function norm(d) {
+  d.promociones ||= []; d.youtube ||= {}; d.instagram ||= {}; d.tiktok ||= {};
+  d.miembros ||= {}; d.vitastrong ||= {}; d.pestanas ||= [];
+  d.pestanas.forEach(t => { t.grupos ||= []; t.grupos.forEach(g => g.packs ||= []); });
+  return d;
+}
+async function load() {
+  app.innerHTML = '<p class="empty">Cargando tu web…</p>';
+  try {
+    const repo = await gh("");
+    branch = repo.default_branch || "main";
+    if (repo.permissions && !repo.permissions.push) return setup("Esa llave solo puede leer. Crea otra con Contents en Read and write.");
+    const f = await gh("/contents/" + FILE + "?ref=" + encodeURIComponent(branch));
+    sha = f.sha;
+    const txt = b64dec(f.content);
+    const data = new Function(txt + "\n;return typeof DATOS !== 'undefined' ? DATOS : null;")();
+    if (!data) throw Object.assign(new Error("parse"), { parse: true });
+    S = norm(data);
+  } catch (e) {
+    if (e.parse || e instanceof SyntaxError) { app.innerHTML = `<div class="msg bad">El archivo datos.js tiene un error y no se puede leer. Deshaz el último cambio que hiciste a mano en GitHub.</div>`; return; }
+    if (e.status === 401) { store.del(); return setup("La llave no funciona o ha caducado. Crea una nueva."); }
+    if (e.status === 404) return setup("No encuentro " + FILE + " en el repositorio " + REPO + ", o la llave no tiene acceso a él.");
+    app.innerHTML = `<div class="msg bad">${esc(errMsg(e))}</div>`; return;
+  }
+  $("#logout").hidden = false; $("#savebar").hidden = false;
+  open.clear(); dirty = false; setStatus("Todo guardado ✓", "ok"); saveBtn.disabled = true;
+  render();
+}
+
+// ---------------- Formularios ----------------
+const getP = p => p.split(".").reduce((o, k) => (o == null ? o : o[k]), S);
+function setP(p, v) {
+  const ks = p.split("."), last = ks.pop(), o = ks.reduce((o, k) => o[k], S);
+  if (v === null || v === undefined) delete o[last]; else o[last] = v;
+}
+function F(label, p, o = {}) {
+  const v = getP(p);
+  const val = v == null ? "" : (o.t === "num" ? String(v).replace(".", ",") : v);
+  const attrs = `data-p="${p}" ${o.t === "num" ? 'data-t="num" inputmode="decimal"' : ""} placeholder="${esc(o.ph || "")}"`;
+  const input = o.t === "area"
+    ? `<textarea rows="${o.rows || 3}" ${attrs}>${esc(val)}</textarea>`
+    : `<input type="${o.t === "date" ? "date" : o.t === "url" ? "url" : "text"}" value="${esc(val)}" ${attrs}>`;
+  return `<label class="f"><span>${label}</span>${input}${o.hint ? `<small>${o.hint}</small>` : ""}</label>`;
+}
+function T(label, p, hint) {
+  return `<label class="sw"><input type="checkbox" data-p="${p}" ${getP(p) !== false ? "checked" : ""}><i></i><span>${label}${hint ? `<small>${hint}</small>` : ""}</span></label>`;
+}
+function card(key, summary, body, cls = "") {
+  return `<details class="card ${cls}" data-k="${key}" ${open.has(key) ? "open" : ""}><summary>${summary}<span class="chev"></span></summary><div class="body">${body}</div></details>`;
+}
+function tools(arr, i, n, delLabel = "Eliminar") {
+  return `<div class="tools">
+    <button data-act="up" data-p="${arr}" data-i="${i}" ${i === 0 ? "disabled" : ""}>↑ Subir</button>
+    <button data-act="down" data-p="${arr}" data-i="${i}" ${i === n - 1 ? "disabled" : ""}>↓ Bajar</button>
+    <button class="del" data-act="del" data-p="${arr}" data-i="${i}">${delLabel}</button></div>`;
+}
+const show = (p, ph) => `<b data-show="${p}" data-ph="${esc(ph)}">${esc(getP(p) || ph)}</b>`;
+
+function promoState(p) {
+  if (p.activa === false) return ["Oculta", "off"];
+  if (p.hasta && new Date(p.hasta + "T23:59:59") < new Date()) return ["Caducada (ya no se ve)", "off"];
+  return [p.hasta ? "Se ve hasta el " + p.hasta.split("-").reverse().join("/") : "Se ve en la web", "on"];
+}
+function calcText(p) {
+  if (p.activa === false) return "Oculto";
+  const precio = Number(p.precio);
+  if (!(precio > 0)) return "Falta el precio";
+  if (!p.nombre || !p.enlace) return "Incompleto: no sale en la web";
+  const pct = Number(S.vitastrong.descuento) || 0;
+  const fin = typeof p.precioFinal === "number" ? p.precioFinal : r2(precio * (1 - pct / 100));
+  return eur(precio) + " → " + eur(fin) + " con tu código";
+}
+
+function render() {
+  const P = S.promociones;
+  let h = "";
+
+  // PROMOCIONES
+  h += `<section class="sec"><h2>🔥 Promociones</h2><p class="sub">Salen arriba del todo en tu web. Puedes tener varias.</p>`;
+  h += P.length ? P.map((p, i) => {
+    const b = "promociones." + i, [st, cl] = promoState(p);
+    return card("promo" + i,
+      `<div class="sum">${show(b + ".titulo", "Promoción sin título")}<em class="chip ${cl}">${st}</em></div>`,
+      T("Se ve en la web", b + ".activa") +
+      F("Etiqueta", b + ".etiqueta", { ph: "BLACK FRIDAY", hint: "Texto pequeño en rojo encima del título." }) +
+      F("Título", b + ".titulo", { ph: "20 % extra en Vitastrong" }) +
+      F("Texto", b + ".texto", { t: "area", rows: 2, ph: "Se suma a mi código tonylocura." }) +
+      F("Texto del botón", b + ".boton", { ph: "Aprovechar ahora", hint: "Déjalo vacío si no quieres botón." }) +
+      F("Enlace del botón", b + ".enlace", { t: "url", ph: "https://vitastrong.es/es/" }) +
+      F("Último día que se ve", b + ".hasta", { t: "date", hint: "Ese día a las 23:59 desaparece sola. Vacío = no caduca nunca." }) +
+      F("Descuento extra que se suma a tu código (%)", b + ".extraEnPacks", { t: "num", ph: "0", hint: "Si se suma a tu código, pon el % (ej: 20) y cada pack enseñará el precio final. Si no se suma, pon 0." }) +
+      tools("promociones", i, P.length));
+  }).join("") : `<p class="empty">No hay ninguna promoción ahora mismo.</p>`;
+  h += `<button class="add" data-act="add-promo">+ Añadir promoción</button></section>`;
+
+  // VITASTRONG
+  h += `<section class="sec"><h2>💊 Vitastrong y tu código</h2><p class="sub">Si cambias el %, todos los precios de los packs se recalculan solos.</p>` +
+    F("Código", "vitastrong.codigo", { ph: "tonylocura" }) +
+    F("Descuento del código (%)", "vitastrong.descuento", { t: "num", ph: "10" }) +
+    F("Texto", "vitastrong.texto", { t: "area", rows: 2, hint: "Donde pongas {codigo} saldrá tu código en negrita." }) +
+    F("Texto del botón", "vitastrong.boton") +
+    F("Enlace", "vitastrong.enlace", { t: "url" }) + `</section>`;
+
+  // CARRITOS
+  const tabs = S.pestanas;
+  if (tabSel >= tabs.length) tabSel = Math.max(0, tabs.length - 1);
+  h += `<section class="sec"><h2>🛒 Carritos</h2><p class="sub">Elige la pestaña, abre un grupo y toca un pack para editarlo.</p>`;
+  h += `<div class="chips">${tabs.map((t, i) => `<button class="tabchip ${i === tabSel ? "on" : ""}" data-act="tab" data-i="${i}">${esc(t.nombre || "Sin nombre")}</button>`).join("")}<button class="tabchip addt" data-act="add-tab">+ Pestaña</button></div>`;
+  const t = tabs[tabSel];
+  if (t) {
+    const tp = "pestanas." + tabSel;
+    h += t.grupos.map((g, gi) => {
+      const gp = tp + ".grupos." + gi;
+      const packs = g.packs.map((p, pi) => {
+        const pp = gp + ".packs." + pi;
+        return card(`p${tabSel}-${gi}-${pi}`,
+          `<div class="sum">${show(pp + ".nombre", "Pack nuevo sin nombre")}<em class="chip ${p.activa === false ? "off" : ""}" data-calc="${pp}">${esc(calcText(p))}</em></div>`,
+          T("Se ve en la web", pp + ".activa") +
+          F("Nombre del pack", pp + ".nombre", { ph: "Pack supervivencia" }) +
+          F("Qué incluye", pp + ".incluye", { t: "area", rows: 3, ph: "creatina, proteína, …" }) +
+          F("Precio sin descuento (€)", pp + ".precio", { t: "num", ph: "49,95", hint: "El precio con tu código se calcula solo." }) +
+          F("Enlace del carrito", pp + ".enlace", { t: "url", ph: "https://vitastrong.es/amb/..." }) +
+          F("Precio con tu código (€) · opcional", pp + ".precioFinal", { t: "num", hint: "Déjalo vacío. Rellénalo solo si Vitastrong te da un céntimo distinto." }) +
+          tools(gp + ".packs", pi, g.packs.length, "Eliminar pack"), "inner");
+      }).join("");
+      return card(`g${tabSel}-${gi}`,
+        `<div class="sum">${show(gp + ".titulo", "Grupo sin nombre")}<em class="chip">${g.packs.length} packs</em></div>`,
+        packs +
+        `<button class="add" data-act="add-pack" data-p="${gp}.packs" data-g="${gi}">+ Añadir pack</button>` +
+        F("Nombre del grupo", gp + ".titulo") +
+        tools(tp + ".grupos", gi, t.grupos.length, "Eliminar grupo"));
+    }).join("");
+    h += `<button class="add" data-act="add-group" data-p="${tp}.grupos">+ Añadir grupo</button>`;
+    h += F("Nombre de esta pestaña", tp + ".nombre");
+    h += `<div class="tools">
+      <button data-act="up" data-p="pestanas" data-i="${tabSel}" ${tabSel === 0 ? "disabled" : ""}>← Mover a la izquierda</button>
+      <button data-act="down" data-p="pestanas" data-i="${tabSel}" ${tabSel === tabs.length - 1 ? "disabled" : ""}>Mover a la derecha →</button>
+      <button class="del" data-act="del" data-p="pestanas" data-i="${tabSel}">Eliminar pestaña</button></div>`;
+  }
+  h += `<hr style="border:0;border-top:1px solid var(--line);margin:18px 0 4px">` +
+    F("Título de la sección", "carritosTitulo") +
+    F("Texto de la sección", "carritosTexto", { t: "area", rows: 2 }) + `</section>`;
+
+  // CABECERA Y REDES
+  h += `<section class="sec"><h2>👤 Tu nombre y redes</h2><p class="sub">Los usuarios van sin la @.</p>` +
+    F("Nombre", "nombre") +
+    F("Descripción", "descripcion", { t: "area", rows: 3 }) +
+    card("yt", `<div class="sum"><b>YouTube</b><em class="chip">@${esc(S.youtube.usuario)}</em></div>`,
+      F("Usuario", "youtube.usuario") + F("Texto", "youtube.texto") + F("Texto del botón", "youtube.boton") +
+      F("ID del canal", "youtube.idCanal", { hint: "Empieza por UC. Se usa para el botón de miembros. Normalmente no hay que tocarlo." })) +
+    card("ig", `<div class="sum"><b>Instagram</b><em class="chip">@${esc(S.instagram.usuario)}</em></div>`,
+      T("Se ve en la web", "instagram.activa") + F("Usuario", "instagram.usuario") + F("Texto", "instagram.texto")) +
+    card("tt", `<div class="sum"><b>TikTok</b><em class="chip">@${esc(S.tiktok.usuario)}</em></div>`,
+      T("Se ve en la web", "tiktok.activa") + F("Usuario", "tiktok.usuario") + F("Texto", "tiktok.texto")) +
+    `</section>`;
+
+  // MIEMBROS Y FINAL
+  h += `<section class="sec"><h2>⭐ Hazte miembro</h2>` +
+    T("Se ve en la web", "miembros.activa") +
+    F("Título", "miembros.titulo") + F("Texto", "miembros.texto", { t: "area", rows: 3 }) + F("Texto del botón", "miembros.boton") + `</section>`;
+  h += `<section class="sec"><h2>📝 Texto del final</h2>` + F("Texto", "notaFinal", { t: "area", rows: 2 }) + `</section>`;
+
+  app.innerHTML = h;
+}
+
+function refreshLive() {
+  app.querySelectorAll("[data-show]").forEach(el => { el.textContent = getP(el.dataset.show) || el.dataset.ph; });
+  app.querySelectorAll("[data-calc]").forEach(el => { el.textContent = calcText(getP(el.dataset.calc)); });
+}
+function setStatus(txt, cls = "") { statusEl.textContent = txt; statusEl.className = cls; }
+function markDirty() { dirty = true; saveBtn.disabled = false; setStatus("Cambios sin guardar", "dirty"); }
+
+app.addEventListener("input", e => {
+  const el = e.target, p = el.dataset.p;
+  if (!p || el.type === "checkbox") return;
+  let v = el.value;
+  if (el.dataset.t === "num") {
+    const s = v.trim().replace(/\s|€/g, "").replace(",", ".");
+    if (s === "") v = null;
+    else if (isNaN(Number(s))) { el.classList.add("bad"); return; }
+    else v = Number(s);
+    el.classList.remove("bad");
+  }
+  setP(p, v); markDirty(); refreshLive();
+});
+app.addEventListener("change", e => {
+  const el = e.target, p = el.dataset.p;
+  if (!p) return;
+  if (el.type === "checkbox") { setP(p, el.checked); markDirty(); render(); }
+  else if (el.type === "date") render();
+});
+app.addEventListener("toggle", e => {
+  const k = e.target.dataset && e.target.dataset.k;
+  if (k) e.target.open ? open.add(k) : open.delete(k);
+}, true);
+app.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  e.preventDefault();
+  const a = b.dataset.act, p = b.dataset.p, i = Number(b.dataset.i);
+  if (a === "tab") { tabSel = i; return render(); }
+  if (a === "add-promo") {
+    S.promociones.push({ activa: true, etiqueta: "OFERTA", titulo: "", texto: "", boton: "Aprovechar ahora", enlace: S.vitastrong.enlace || "", hasta: "", extraEnPacks: 0 });
+    open.add("promo" + (S.promociones.length - 1));
+  } else if (a === "add-tab") {
+    const n = prompt("Nombre de la nueva pestaña:");
+    if (!n) return;
+    S.pestanas.push({ nombre: n, grupos: [{ titulo: "Nuevo grupo", packs: [] }] });
+    tabSel = S.pestanas.length - 1; open.add("g" + tabSel + "-0");
+  } else if (a === "add-group") {
+    const arr = getP(p); arr.push({ titulo: "Nuevo grupo", packs: [] });
+    open.add("g" + tabSel + "-" + (arr.length - 1));
+  } else if (a === "add-pack") {
+    const arr = getP(p); arr.push({ nombre: "", incluye: "", precio: null, enlace: "" });
+    open.add(`p${tabSel}-${b.dataset.g}-${arr.length - 1}`);
+  } else if (a === "del") {
+    const arr = getP(p), it = arr[i];
+    if (!confirm(`¿Seguro que quieres eliminar "${it.nombre || it.titulo || "esto"}"?`)) return;
+    arr.splice(i, 1);
+    if (p === "pestanas") tabSel = Math.max(0, i - 1);
+  } else if (a === "up" || a === "down") {
+    const arr = getP(p), j = a === "up" ? i - 1 : i + 1;
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    if (p === "pestanas") tabSel = j;
+  }
+  markDirty(); render();
+});
+
+// ---------------- Guardar ----------------
+function gen() {
+  return "// Este archivo lo crea el panel (admin.html). Lo más cómodo es cambiar la web desde ahí.\n" +
+    "// Última actualización: " + new Date().toLocaleString("es-ES") + "\n\n" +
+    "const DATOS = " + JSON.stringify(S, null, 2) + ";\n";
+}
+saveBtn.onclick = async () => {
+  const mal = [];
+  S.pestanas.forEach(t => t.grupos.forEach(g => g.packs.forEach(p => {
+    if (p.activa !== false && (!p.nombre || !(Number(p.precio) > 0) || !p.enlace)) mal.push(p.nombre || "(pack sin nombre)");
+  })));
+  if (mal.length && !confirm("A estos packs les falta nombre, precio o enlace, así que no saldrán en la web:\n\n- " + mal.join("\n- ") + "\n\n¿Publicar igualmente?")) return;
+  saveBtn.disabled = true; setStatus("Publicando…");
+  try {
+    const r = await gh("/contents/" + FILE, { method: "PUT", body: JSON.stringify({ message: "Actualizar web desde el panel", content: b64enc(gen()), sha, branch }) });
+    sha = r.content.sha; dirty = false;
+    setStatus("✓ Publicado. En 1-2 minutos lo verás en tu web.", "ok");
+  } catch (e) {
+    setStatus(errMsg(e), "bad"); saveBtn.disabled = false;
+  }
+};
+window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+$("#logout").onclick = () => {
+  if (dirty && !confirm("Tienes cambios sin guardar. ¿Salir igualmente?")) return;
+  if (!confirm("Se borrará la llave de este dispositivo. Para volver a entrar tendrás que pegarla otra vez. ¿Seguir?")) return;
+  store.del(); token = null; dirty = false; setup();
+};
+
+token = store.get();
+token ? load() : setup();
+</script>
+</body>
+</html>
