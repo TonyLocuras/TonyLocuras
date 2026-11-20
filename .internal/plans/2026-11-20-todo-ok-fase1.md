@@ -441,7 +441,7 @@ service cloud.firestore {
           && resource.data.status == 'active'
           && request.resource.data.status == 'alarm'
           && request.time >= resource.data.deadlineAt
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])));
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'alarmFiredAt'])));
       allow delete: if false;
 
       match /checkins/{cid} {
@@ -471,7 +471,7 @@ service cloud.firestore {
 - Test: `test/domain/expedition_test.dart`
 
 **Interfaces:**
-- Produces: `enum ExpeditionStatus { planned, active, alarm, finished }`; `class Expedition` con `id, explorerUid, explorerName, contactUids, name, zone, startAt, deadlineAt, status, checkinInterval (Duration?), lastCheckinAt?, lastLat?, lastLng?, lastBattery?`; `factory Expedition.fromMap(String id, Map<String, dynamic> m)` (Timestamps vía `toDate().toUtc()`); `Map<String, dynamic> toMap()`; `bool get isOverdue(DateTime now)`.
+- Produces: `enum ExpeditionStatus { planned, active, alarm, finished }`; `class Expedition` con `id, explorerUid, explorerName, contactUids, name, zone, startAt, deadlineAt, status, checkinInterval (Duration?), lastCheckinAt?, lastLat?, lastLng?, lastBattery?, alarmFiredAt? (DateTime?, lo escribe el contacto con serverTimestamp al disparar)`; `factory Expedition.fromMap(String id, Map<String, dynamic> m)` (Timestamps vía `toDate().toUtc()`); `Map<String, dynamic> toMap()`; `bool get isOverdue(DateTime now)`.
 
 **Acceptance Criteria:**
 - Ida y vuelta `toMap`/`fromMap` conserva todos los campos y las horas en UTC.
@@ -1203,4 +1203,4 @@ Nota: si tras un check-in tardío el límite se amplió, `deadlineAt` ya es post
 
 **Placeholders:** ninguno; los pasos de UI de las Tasks 8–13 dan interfaz, comportamiento y tests exactos, y el código largo de pantallas se escribe durante la ejecución siguiendo esas interfaces.
 
-**Consistencia de tipos:** `AlarmSpec`, `ArmReporter`, `AlarmOrchestrator`, `Expedition` y los métodos de los repositorios usan los mismos nombres en todas las tasks. `alarmFiredAt` se añade al modelo en la Task 12; si se ejecuta en orden, hay que reabrir la Task 5 para incluirlo (anotado allí).
+**Consistencia de tipos:** `AlarmSpec`, `ArmReporter`, `AlarmOrchestrator`, `Expedition` y los métodos de los repositorios usan los mismos nombres en todas las tasks. `alarmFiredAt` está en el modelo (Task 5), en la regla del contacto (Task 4) y se usa en `markAlarm` (Task 8) y `contactStatus` (Task 12). Al ejecutar la Task 4 se añade además un test: el contacto puede escribir `status` + `alarmFiredAt` tras vencer el límite y ningún otro campo. En la Task 12, `contactStatus` compara `lastCheckinAt > alarmFiredAt`.
