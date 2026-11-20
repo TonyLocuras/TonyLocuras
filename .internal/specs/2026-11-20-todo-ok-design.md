@@ -1,6 +1,7 @@
-# App TODO OK — Diseño (fase 1 MVP + fase 2)
+# App TODO OK — Diseño (fase 1 MVP + fases posteriores)
 
-Fuente: "App Todo OK – planteamiento para Claude Code" (PDF de Tony) + decisiones de brainstorming del 2026-11-20.
+Fuente: "App Todo OK – planteamiento para Claude Code" (PDF de Tony) + brainstorming y stress-test del 2026-11-20.
+Versión revisada tras stress-test (ver al final).
 
 ## Objetivo
 App Flutter para expediciones de TonyLocuras. Tony confirma con un botón; si no lo hace antes de la hora límite, el contacto recibe una alarma aunque Tony no tenga cobertura. Sin dispositivos externos ni suscripciones.
@@ -8,49 +9,113 @@ App Flutter para expediciones de TonyLocuras. Tony confirma con un botón; si no
 ## Decisiones tomadas
 | Tema | Decisión |
 |---|---|
-| Ubicación del código | `/todo_ok` dentro de este repo (aparte de la web) |
-| Stack | Flutter (Android + iOS), Firebase: Auth, Firestore, FCM; Cloud Functions (plan Blaze) |
-| Alarma | **Híbrida**: local en el móvil del contacto + Cloud Function de respaldo |
-| iPhone | Alarma degradada aceptada por Tony: notificación normal, puede quedar silenciada por No Molestar/Concentración. La app debe avisarlo al contacto iOS |
+| Ubicación del código | **Repo privado separado** (a crear por Tony y añadir a la sesión). No va en este repo público |
+| Stack | Flutter (Android + iOS), Firebase plan gratuito: Auth (Google), Firestore, FCM. **Sin Blaze ni Cloud Functions en fase 1** |
+| Alarma | **Solo local** en el móvil del contacto (fase 1). Capa servidor = fase 3 opcional |
+| Contacto Android | Alarma a pantalla completa con sonido, ignora silencio |
+| Contacto iPhone | Notificación local degradada, puede silenciarse. Instalarla requiere Apple Developer (99 $/año) y un Mac: fuera de la gratuidad, a cargo de Tony |
 | Entrega | MVP primero; GPS/mapas/GPX en fase 2 |
 | Entorno de Tony | Nada preparado: se entrega guía de montaje de Firebase y Flutter |
 
 ## Principio de seguridad
 La alarma depende de la **hora límite**, no de que Tony envíe nada. Si Tony falla (batería, sin cobertura, incapacitado), la alarma suena igual.
 
-## Arquitectura de alarma (dos capas independientes)
-1. **Local (Android, fiable):** el contacto, al sincronizar la expedición, programa una alarma exacta (`SCHEDULE_EXACT_ALARM`, `USE_FULL_SCREEN_INTENT`, canal con prioridad de alarma que ignora silencio). Cada TODO OK o check-in cancela y reprograma con la nueva hora límite. Finalizar cancela.
-2. **Servidor (respaldo):** Cloud Function programada (cada minuto) busca expediciones activas con `deadline < now` y estado no OK, marca `alarm` y envía FCM de alta prioridad al contacto. Es idempotente (no repite push si ya está en `alarm`).
+## Semántica de las confirmaciones
+- Solo existe el **check-in** (botón TODO OK). Registra hora, última coordenada y batería.
+- Con intervalo configurado, un check-in reprograma el límite a `max(límite_actual, ahora_efectivo + intervalo)`. Sin intervalo, no mueve el límite.
+- **TODO OK nunca desarma la alarma.** Solo **Finalizar** (vuelta a casa) la cancela.
+- Estados de expedición: `active | alarm | finished`. "OK" en la pantalla del contacto se deriva del último check-in reciente, no es un estado.
+- Ampliar el límite a mano cuenta como un check-in. Olvidar pulsar Finalizar produce una falsa alarma aceptada; la app de Tony recuerda finalizar al detectar que está de vuelta.
 
-Fallos conocidos asumidos: contacto con el móvil apagado, en modo avión o con la app forzada a cerrar tras fabricante agresivo de batería. La app del contacto muestra una pantalla de comprobación de permisos/optimización de batería.
+## Falsa alarma vs alarma perdida
+- Sesgo explícito: **ante la duda, suena**.
+- Un check-in que llega tarde se aplica con su hora efectiva. Si la alarma ya sonó, **no se apaga sola**: la pantalla pasa a aviso naranja "Tony hizo check-in a las HH:MM (llegó con retraso)" y el contacto la cierra a mano.
+- La pantalla de alarma muestra siempre hora del último check-in y cuánto hace.
+
+## Reloj
+- Instantes en UTC; formato local solo al mostrar.
+- Hora efectiva del check-in = `min(hora_cliente, hora_servidor_de_recepción)`; se rechaza una hora de cliente futura.
+- Aviso si Tony tiene desactivada la hora automática.
+
+## Armado de la alarma (contacto)
+- Al programar la alarma, el contacto escribe `armedAt` y la versión del límite en `expeditions/{id}/contacts/{uid}`. Tony lo ve antes de salir: "Contacto A armado ✓ / Contacto B sin confirmar ✗".
+- **No se puede iniciar** la expedición sin al menos un contacto armado con el límite vigente, salvo confirmación explícita ("salgo sin alarma activa").
+- Mínimo dos contactos recomendado (aviso, no bloqueo). Cada contacto arma su propia alarma: redundancia.
+- Acuse obligatorio: el contacto pulsa "Recibida" (`ackAt`). Sin acuse en 5 min, la propia app vuelve a sonar hasta el acuse. El escalado entre contactos queda diferido a la fase 3 (requiere servidor).
+- Las alarmas pendientes se guardan en local y se reprograman con un receptor `BOOT_COMPLETED` tras reiniciar.
+- Si el contacto fuerza el cierre, Android cancela las alarmas: la verificación de armado lo detecta en el siguiente arranque.
+
+## Android: que suene de verdad
+- Programar con `setAlarmClock`; mostrar con notificación de pantalla completa en canal de alarma, con vibración y volumen forzado.
+- Pantalla de **permisos guiados** (alarmas exactas, pantalla completa Android 14+, exención de batería, notificaciones) con estado verde/rojo. Si falta alguno, no se marca como armado.
+- Botón **"Probar alarma"**: suena en 60 s con pantalla bloqueada y app cerrada.
+- Enlace a instrucciones por fabricante (autoarranque, ahorro de batería).
+- Validación en móvil físico del contacto antes de la primera expedición real: criterio de aceptación.
+
+## Vinculación, autenticación y reglas de Firestore
+- Firebase Auth con **Google Sign-In**: reinstalar o cambiar de móvil conserva identidad y vínculos.
+- Código de **10 caracteres base32** (50 bits), un solo uso, caduca a 10 min, en `pairingCodes/{código}`. Reglas: `get` por ID permitido, `list` prohibido. El QR contiene el mismo código.
+- Canje atómico: el contacto escribe `pairings/{id}` en un batch que marca el código como usado; validado con `getAfter()` (existe, no caducado, no usado, `contactUid == request.auth.uid`).
+- Reglas por campo: solo el explorador escribe expedición y check-ins; cada contacto escribe solo su propio `armedAt` y `ackAt`.
+- Tony puede desvincular a un contacto y este pierde la lectura de inmediato.
+- **Retención:** política **TTL de Firestore** sobre un campo `expireAt` (30 días tras finalizar), gratis y sin Blaze.
+- Tests de reglas con el emulador: obligatorios en cada cambio.
 
 ## Modelo de datos (Firestore, persistencia offline activada)
-- `users/{uid}`: rol (`explorer`|`contact`), nombre, `fcmToken`, plataforma.
-- `pairings/{id}`: `explorerUid`, `contactUid`, creado por código de 8 caracteres de un solo uso con caducidad (o QR del mismo código).
-- `expeditions/{id}`: `explorerUid`, `contactUids[]`, nombre, zona, `startAt`, `deadlineAt`, `status` (`active`|`ok`|`alarm`|`finished`), `checkinIntervalMin?`, `createdAt`.
-- `expeditions/{id}/checkins/{id}`: `at`, `lat`, `lng`, `battery`, `kind` (`ok`|`checkin`).
-- Reglas: solo el explorador y sus contactos vinculados leen la expedición; solo el explorador escribe checkins y estado; la Cloud Function escribe `alarm`.
+- `users/{uid}`: rol, nombre, `fcmToken` (reservado para fase 3), plataforma.
+- `pairingCodes/{código}`: `explorerUid`, `expiresAt`, `used`.
+- `pairings/{id}`: `explorerUid`, `contactUid`, creado.
+- `expeditions/{id}`: `explorerUid`, `contactUids[]`, nombre, zona, `startAt`, `deadlineAt`, `status`, `checkinIntervalMin?`, `createdAt`, `expireAt?`.
+- `expeditions/{id}/checkins/{id}`: `at`, `lat`, `lng`, `battery`.
+- `expeditions/{id}/contacts/{uid}`: `armedAt`, `armedDeadlineVersion`, `ackAt`.
 
 ## Funciones fase 1 (MVP)
-1. **Vincular**: Tony genera código/QR, el contacto lo introduce o escanea.
-2. **Crear expedición**: nombre, zona, salida, hora límite. Sincroniza al contacto con cobertura.
-3. **Botón TODO OK**: un toque; guarda hora, última coordenada y batería. Sin datos: queda en la cola offline de Firestore y se reintenta.
-4. **Check-ins opcionales**: intervalo configurable; cada uno amplía la hora límite por el intervalo.
-5. **Alarma por hora límite**: pantalla completa y sonido en Android con la última posición conocida y la zona.
-6. **Finalizar**: cierra la expedición y cancela alarmas local y de servidor.
-Pantallas: Tony (inicio con expedición activa y botón, historial, ajustes); Contacto (estado OK/pendiente/alarma, cuenta atrás, última posición).
+1. Vincular con código/QR.
+2. Crear expedición (nombre, zona, salida, hora límite, intervalo opcional); sincroniza al contacto con cobertura.
+3. Botón TODO OK con cola offline de Firestore.
+4. Check-ins/ampliar el límite según la semántica de arriba.
+5. Alarma local a pantalla completa con última posición y zona.
+6. Finalizar: cierra y cancela la alarma local de los contactos.
+Pantallas: Tony (expedición activa, botón, estado de armado de contactos, historial, ajustes); Contacto (estado, cuenta atrás, última posición, permisos, "Probar alarma").
 
-## Fase 2 (fuera del MVP, spec propia)
-Servicio GPS en primer plano con intervalo configurable, mapas offline (`flutter_map` + caché de teselas OSM), ruta prevista dibujada/GPX, subida del track, exportación GPX, ruta real sobre la prevista para el contacto.
+## Fase 2 (spec propia)
+Servicio GPS en primer plano con intervalo configurable, mapas offline (`flutter_map` + caché OSM), ruta prevista dibujada/GPX, subida del track, exportación GPX, ruta real sobre la prevista para el contacto. SMS de respaldo con un toque cuando hay voz pero no datos (opcional).
 
-## Permisos y requisitos
-Notificaciones, alarmas exactas, exención de optimización de batería, ubicación (en segundo plano en fase 2). Persistencia offline de Firestore activada.
+## Fase 3 (opcional, requiere Blaze)
+Cloud Function programada cada minuto con transacción idempotente, push FCM de alta prioridad como respaldo, escalado automático a otros contactos. Alertas de presupuesto a 1 € y 5 €, sin apagado automático de facturación, y política de limpieza de imágenes en Artifact Registry.
 
-## Riesgos y límites
-- Sin señal, la posición no llega; la hora límite es la alerta.
-- iOS: sin Critical Alerts, la alarma puede no sonar en silencio.
-- Blaze exige tarjeta (coste esperado 0 €); fijar presupuesto/alerta de gasto.
-- No se puede probar en móvil físico desde la sesión en la nube: Tony compila y valida alarma en silencio, ahorro de batería y reinicio del móvil.
+## Riesgos aceptados (explícitos)
+1. Sin servidor: si el móvil del contacto está apagado, sin batería o con la app cerrada a la fuerza, **no suena nada** y nadie lo detecta.
+2. iPhone: sin vía gratuita de instalación y, instalado, puede quedar silenciado.
+3. Sin señal no llega la posición; la hora límite es la única alerta.
+La app muestra una línea fija con estos límites en el primer arranque y en cada expedición.
+
+## Privacidad y repositorio
+- Repo **privado**; `google-services.json` fuera de git y claves de API restringidas por paquete y huella SHA-1.
+- Ubicación solo visible para contactos vinculados; revocable; retención por TTL.
 
 ## Pruebas
-Unitarias de la lógica de hora límite/reprogramación y la cola de TODO OK; tests de reglas de Firestore con el emulador; test de la Cloud Function (idempotencia); checklist manual en móvil real (alarma en silencio, app cerrada, modo avión, reinicio).
+Unitarias de la lógica de límite/reprogramación/hora efectiva y de la cola de TODO OK; tests de reglas con el emulador; tests del canje de código; checklist manual en móvil real (alarma en silencio, app cerrada, modo avión, reinicio, fabricante concreto, "Probar alarma").
+
+## Stress Test Results: App TODO OK
+
+### Resolved Decisions
+- Semántica: TODO OK nunca desarma; solo Finalizar. Estados `active|alarm|finished`.
+- Falsa alarma: ante la duda suena; los check-ins tardíos no apagan una alarma disparada.
+- Reloj: UTC y hora efectiva mínima cliente/servidor.
+- Contacto: confirmación de armado visible y obligatoria, acuse con reintento local, reprogramación tras reinicio.
+- Servidor: **sin Blaze en fase 1** (decisión de Tony tras discutir coste); capa servidor pasa a fase 3.
+- Reglas/vinculación: Google Sign-In, código de 50 bits, canje atómico, escrituras por campo, TTL.
+- iPhone: se mantiene alarma degradada por decisión de Tony; instalación fuera de la gratuidad.
+- Android: `setAlarmClock`, permisos guiados, "Probar alarma", validación física.
+- Seguridad: riesgos aceptados documentados; app en repo privado separado; claves restringidas.
+
+### Changes Made
+Eliminado el estado `ok`; añadidos armado, acuse, BOOT_COMPLETED, TTL, hora efectiva; capa servidor y escalado movidos a fase 3; app movida a repo privado.
+
+### Deferred / Parking Lot
+Cloud Function + push de respaldo + escalado (fase 3); Apple Developer y Critical Alerts/time-sensitive en iOS; SMS de respaldo (fase 2).
+
+### Confidence Assessment
+- Overall: Medium. La lógica es sólida, pero la fiabilidad real depende de móviles físicos y fabricantes que no se pueden probar desde la nube.
+- Áreas de preocupación: riesgo 1 (sin servidor) y la instalación en iPhone.
