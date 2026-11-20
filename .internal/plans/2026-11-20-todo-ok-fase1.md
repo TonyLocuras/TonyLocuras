@@ -30,10 +30,17 @@ Spec: `.internal/specs/2026-11-20-todo-ok-design.md`. Este plan **corrige o prec
 - Línea fija de límites visible en el primer arranque y en cada expedición.
 - iPhone: notificación local degradada; instalación fuera de la gratuidad (Apple Developer + Mac).
 - Tests de reglas con el emulador en cada cambio de reglas. Validación en móvil físico antes de la primera expedición real.
+- Cada alarma tiene dos ranuras: `principal` (el límite) y `repetición` (reintento a 5 min). "Recibida" cancela solo la repetición y el sonido. Un check-in de Tony con la expedición en `alarm` la rearma a `active` y borra `alarmFiredAt`.
+- Servicio de vigilancia del contacto: permanente mientras haya un vínculo (pausable en Ajustes), tipo de servicio `specialUse`, latido `lastSeenAt` cada 5 min. Gate de salida: armado vigente **y** latido de menos de 10 min.
+- Retención: `expireAt` en `checkins` y `contacts` (ahora + 45 d), en `expeditions` (`deadlineAt` + 30 d, `finish` = ahora + 30 d) y TTL en `pairingCodes.expiresAt`. El TTL puede tardar 24–72 h; no se promete "exactamente 30 días".
+- Una sola clave de firma de release registrada en Firebase (SHA-1 y SHA-256); distribución con Firebase App Distribution.
+- Las escrituras de la app y las reglas comparten fixtures JSON (`test/fixtures/*.json`); Firestore no se prueba con mocks.
+- Un check-in rechazado nunca desaparece en silencio: bandeja de salida local confirmada por un snapshot de servidor.
+- `POST_NOTIFICATIONS` se pide en tiempo de ejecución; no se usa `setBypassDnd` (la alarma suena en No Molestar por el canal de alarma, se verifica en el checklist).
 
 ## Verificación y entorno (leer antes de ejecutar)
 
-El contenedor en la nube **no tiene Flutter ni Dart** (solo Node 22). Los tests de Dart (`flutter test`) y la compilación Android se ejecutan en la máquina de Tony o tras instalar el SDK en el entorno de sesión. Los tests de reglas de Firestore (Node) sí se pueden ejecutar aquí. Ningún criterio de alarma se da por verificado sin el checklist en móvil físico (Task 14).
+El contenedor en la nube **no tiene Flutter ni Dart** (solo Node 22). Los tests de Dart (`flutter test`) y la compilación Android se ejecutan en la máquina de Tony o tras instalar el SDK en el entorno de sesión. Los tests de reglas de Firestore (Node) sí se pueden ejecutar aquí. Ningún criterio de alarma se da por verificado sin el checklist en móvil físico (Task 14). **La Task 1b (spike) es un bloqueo "seguir o parar" para las Tasks 6 a 13**: si el servicio de vigilancia no funciona en un Android real, se replantea antes de seguir.
 
 ## File Structure
 
@@ -97,7 +104,7 @@ firebase/node_modules/
 key.properties
 ```
 
-- [ ] **Step 3: `docs/SETUP.md`** con estos apartados, cada uno con pasos numerados y comandos exactos: (1) instalar Flutter y Android Studio; `flutter doctor`; (2) crear proyecto Firebase en la consola, **dejar el plan Spark**; (3) activar Authentication → Google y Firestore (modo producción, región `eur3`); (4) `dart pub global activate flutterfire_cli && flutterfire configure --project=<id> --platforms=android,ios`; (5) añadir la huella SHA-1 (`cd android && ./gradlew signingReport`) en Firebase y restringir la clave de API por paquete `com.tonylocuras.todook` y SHA-1 en Google Cloud → Credenciales; (6) política TTL: Firestore → Ajustes → TTL → colección `expeditions`, campo `expireAt`; (7) `firebase deploy --only firestore:rules,firestore:indexes`; (8) instalar el APK en el móvil del contacto permitiendo "instalar apps desconocidas".
+- [ ] **Step 3: `docs/SETUP.md`** con estos apartados, cada uno con pasos numerados y comandos exactos: (1) instalar Flutter y Android Studio; `flutter doctor`; (2) crear proyecto Firebase en la consola, **dejar el plan Spark**; (3) activar Authentication → Google y Firestore (modo producción, región `eur3`); (4) `dart pub global activate flutterfire_cli && flutterfire configure --project=<id> --platforms=android,ios`; (5) añadir la huella SHA-1 (`cd android && ./gradlew signingReport`) en Firebase y restringir la clave de API por paquete `com.tonylocuras.todook` y SHA-1 en Google Cloud → Credenciales; (6) políticas TTL (Firestore → Ajustes → TTL): `expeditions.expireAt`, grupo de colecciones `checkins.expireAt`, grupo `contacts.expireAt` y `pairingCodes.expiresAt`; el borrado puede tardar 24–72 h tras la fecha; (7) `firebase deploy --only firestore:rules,firestore:indexes`; (8) crear el keystore de release (`keytool -genkey -v -keystore ~/todook-release.jks -alias todook -keyalg RSA -keysize 2048 -validity 10000`), guardarlo **fuera del repo con copia de seguridad** (si se pierde, el contacto tendrá que desinstalar la app), registrar su SHA-1 y SHA-256 en Firebase y en la restricción de la clave de API, y firmar con él todos los APK que vayan a móviles reales (si no, el login con Google falla con `ApiException: 10`); (9) distribuir el APK al contacto con Firebase App Distribution (gratis en Spark) y permitir "instalar apps desconocidas"; (10) en iPhone, instalar requiere Apple Developer y un Mac, fuera de la gratuidad.
 
 - [ ] **Step 4: `pubspec.yaml` dependencias**
 
@@ -140,6 +147,30 @@ Future<void> main() async {
 
 - [ ] **Step 6: `lib/app.dart`** con `MaterialApp` mínimo (`home: Scaffold(body: Center(child: Text('TODO OK')))`) y `class TodoOkApp extends StatelessWidget`.
 - [ ] **Step 7: Verify** `flutter analyze` → sin errores. **Step 8: Commit** `git add -A && git commit -m "chore: andamiaje Flutter y guía de montaje"`.
+
+---
+
+### Task 1b: Spike de viabilidad del servicio de vigilancia (go / no-go)
+
+**Files:**
+- Create: `spike/` (app mínima desechable) y `docs/SPIKE.md` (resultados)
+
+**Interfaces:**
+- Consumes: proyecto Firebase y Flutter de la Task 1 (steps 1–3 del `SETUP.md`).
+- Produces: decisión escrita en `docs/SPIKE.md`: **GO** (se sigue con `flutter_foreground_task`) o **NO-GO** (se reemplaza la Task 9 por un servicio nativo en Kotlin con el SDK de Firestore para Android).
+
+**Acceptance Criteria:**
+- En un Android real, con la app barrida de recientes, un servicio en primer plano de tipo `specialUse` mantiene un listener de Firestore y refleja en su notificación un valor que se cambia desde otro móvil, en menos de 30 s.
+- Tras 24 h seguidas en Android 15 el sistema no ha parado el servicio.
+- Consumo de batería medido en 8 h y anotado.
+- Tras reiniciar el móvil, una notificación normal avisa "Abre TODO OK para reanudar la vigilancia".
+- Resultado y modelo/versión de Android quedan en `docs/SPIKE.md`.
+
+- [ ] **Step 1:** Crear `spike/` con `flutter_foreground_task` (`serviceTypes: [ForegroundServiceTypes.specialUse]`, propiedad `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` en el manifest) y, en el `TaskHandler.onStart`, `DartPluginRegistrant.ensureInitialized()`, `Firebase.initializeApp(...)` y un listener sobre `spike/state` que actualiza el texto de la notificación.
+- [ ] **Step 2:** Instalar en un Android real, arrancar el servicio, **barrer la app de recientes** y cambiar `spike/state` desde la consola de Firebase o desde otro móvil. Medir la latencia.
+- [ ] **Step 3:** Dejar 8 h con el móvil bloqueado y anotar el consumo; después 24 h seguidas en Android 15.
+- [ ] **Step 4:** Reiniciar el móvil y comprobar el aviso de reanudación (un `BroadcastReceiver` de `BOOT_COMPLETED` que lanza una notificación normal).
+- [ ] **Step 5:** Escribir `docs/SPIKE.md` con GO / NO-GO. Si es NO-GO, **detenerse y reabrir el plan con el usuario** antes de la Task 2 en adelante. Commit `docs: resultado del spike de vigilancia`.
 
 ---
 
@@ -280,6 +311,8 @@ String? normalizePairingCode(String raw) {
 - Un contacto solo escribe su propio documento de `contacts/{uid}` y solo puede poner `status: alarm` si `request.time >= deadlineAt`.
 - El límite solo puede ampliarse hasta `request.time + checkinIntervalMin` (24 h sin intervalo).
 - Desvincular revoca la lectura.
+- El explorador puede pasar una expedición de `alarm` a `active` (rearme) y borrar los `checkins` y `contacts` de una expedición propia y, después, la expedición solo si está `finished`.
+- Contrato Dart↔reglas: cada escritura de la app se comprueba en Node con **la misma forma exacta de documento** que genera el código Dart (ver Step 6), incluidos los rechazos: límite con reloj adelantado rechazado mientras el registro del check-in suelto se acepta; un contacto no puede escribir `lastLat`; un extraño no puede finalizar.
 
 - [ ] **Step 1: `firebase/package.json`**
 
@@ -442,17 +475,18 @@ service cloud.firestore {
           && request.resource.data.status == 'alarm'
           && request.time >= resource.data.deadlineAt
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'alarmFiredAt'])));
-      allow delete: if false;
+      allow delete: if signedIn() && resource.data.explorerUid == request.auth.uid && resource.data.status == 'finished';
 
       match /checkins/{cid} {
         allow read: if isExplorerOf(id) || isContactOf(id);
         allow create: if isExplorerOf(id);
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if isExplorerOf(id);
       }
       match /contacts/{uid} {
         allow read: if isExplorerOf(id) || (signedIn() && request.auth.uid == uid);
         allow create, update: if signedIn() && request.auth.uid == uid && isContactOf(id);
-        allow delete: if false;
+        allow delete: if isExplorerOf(id);
       }
     }
   }
@@ -460,7 +494,29 @@ service cloud.firestore {
 ```
 
 - [ ] **Step 5:** `npm test` → PASS (todos). Si un test de `get()` con `extension` falla por el emulador, ajustar la regla, nunca el test.
-- [ ] **Step 6: Commit** `feat: reglas de Firestore y tests de emulador`.
+- [ ] **Step 6: Pruebas de contrato con fixtures compartidos**
+  - Cada repositorio de Dart construye sus escrituras con funciones puras que reciben un `PayloadCodec` (producción: `Timestamp`/`FieldValue`; test: marcadores JSON): `checkinRecordPayload`, `checkinDeadlinePayload` (incluye el rearme `status: active` + `alarmFiredAt` borrado), `startPayload`, `finishPayload`, `markAlarmPayload`, `armedPayload`, `heartbeatPayload`, `ackPayload`, `redeemPayloads`, `deleteExpedition`.
+  - `test/fixtures_test.dart` (Dart) las serializa a `test/fixtures/*.json` con los marcadores `{"__tsOffsetMs": n}`, `{"__serverTimestamp": true}` y `{"__delete": true}`.
+  - `firebase/test/contract.test.js` lee esos JSON, los revive con este conversor y comprueba con el emulador que se aceptan (y que las variantes inválidas se rechazan):
+
+```js
+const { Timestamp, serverTimestamp, deleteField } = require('firebase/firestore');
+function revive(v) {
+  if (Array.isArray(v)) return v.map(revive);
+  if (v && typeof v === 'object') {
+    if ('__tsOffsetMs' in v) return Timestamp.fromMillis(Date.now() + v.__tsOffsetMs);
+    if (v.__serverTimestamp) return serverTimestamp();
+    if (v.__delete) return deleteField();
+    return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, revive(x)]));
+  }
+  return v;
+}
+module.exports = { revive };
+```
+
+  - Casos mínimos: registro de check-in aceptado; actualización del límite con límite ≤ `request.time + intervalo` aceptada y con reloj adelantado (`__tsOffsetMs` de +10 h con intervalo de 3 h) rechazada; rearme `alarm → active` aceptado; `markAlarm` del contacto aceptado solo tras vencer el límite; `heartbeatPayload` y `armedPayload` solo en el documento propio; `deleteExpedition` solo con `finished`.
+  - Run: `cd firebase && npm test` → PASS.
+- [ ] **Step 7: Commit** `feat: reglas de Firestore, tests de emulador y contrato`.
 
 ---
 
@@ -625,6 +681,14 @@ void main() {
     await o.apply(_e(ExpeditionStatus.alarm, d1.add(const Duration(hours: 5))));
     expect(sch.scheduled['e1']!.fireAt, d1);
   });
+  test('alarm → active con límite futuro (rearme por check-in) reprograma', () async {
+    await o.apply(_e(ExpeditionStatus.active, d1));
+    await o.apply(_e(ExpeditionStatus.alarm, d1));
+    final d2 = d1.add(const Duration(hours: 3));
+    await o.apply(_e(ExpeditionStatus.active, d2));
+    expect(sch.scheduled['e1']!.fireAt, d2);
+    expect(rep.armed['e1'], d2.millisecondsSinceEpoch);
+  });
   test('límite ampliado reprograma y reporta nueva versión', () async {
     await o.apply(_e(ExpeditionStatus.active, d1));
     final d2 = d1.add(const Duration(hours: 3));
@@ -723,9 +787,10 @@ class AlarmOrchestrator {
 - Al disparar: notificación de pantalla completa en el canal de alarma (sonido por `STREAM_ALARM`, vibración) y `AlarmActivity` sobre la pantalla bloqueada.
 - Sin acuse en 5 min vuelve a programarse a sí misma y suena otra vez.
 - Tras reiniciar el móvil se reprograman las alarmas guardadas.
-- Pulsar "Recibida" detiene el sonido y registra el acuse local para sincronizarlo.
+- Cada expedición tiene dos ranuras: `principal` (límite) y `retry` (`"<id>#retry"`). Pulsar "Recibida" detiene el sonido, borra la notificación, cancela **solo la ranura de repetición** y registra el acuse local; **no** cancela una alarma principal futura. El registro local solo se borra si su `fireAtMillis` ya pasó.
+- Si Tony rearma la expedición mientras suena una alarma, la nueva alarma principal queda programada y la que suena no se apaga hasta "Recibida".
 
-- [ ] **Step 1: Manifest** (dentro de `<manifest>`): permisos `SCHEDULE_EXACT_ALARM`, `USE_FULL_SCREEN_INTENT`, `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `VIBRATE`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_DATA_SYNC`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`. Dentro de `<application>`:
+- [ ] **Step 1: Manifest** (dentro de `<manifest>`): permisos `SCHEDULE_EXACT_ALARM`, `USE_FULL_SCREEN_INTENT`, `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `VIBRATE`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`. Dentro de `<application>`:
 
 ```xml
 <activity android:name=".AlarmActivity" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true"
@@ -773,17 +838,22 @@ object Alarms {
     val show = PendingIntent.getActivity(c, 0, Intent(c, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
     am.setAlarmClock(AlarmManager.AlarmClockInfo(atMillis, show), pending(c, id))
   }
-  fun cancel(c: Context, id: String) { (c.getSystemService(Context.ALARM_SERVICE) as AlarmManager).cancel(pending(c, id)); AlarmStore.remove(c, id) }
+  fun retryId(id: String) = "$id#retry"
+  fun baseId(slot: String) = slot.removeSuffix("#retry")
+  fun cancelSlot(c: Context, slot: String) = (c.getSystemService(Context.ALARM_SERVICE) as AlarmManager).cancel(pending(c, slot))
+  // finished: cancela ambas ranuras y el registro local
+  fun cancelAll(c: Context, id: String) { cancelSlot(c, id); cancelSlot(c, retryId(id)); AlarmStore.remove(c, id) }
 }
 
 class AlarmReceiver : BroadcastReceiver() {
   override fun onReceive(c: Context, i: Intent) {
-    val id = i.getStringExtra("id") ?: return
+    val slot = i.getStringExtra("id") ?: return
+    val id = Alarms.baseId(slot)
     val spec = AlarmStore.get(c, id) ?: return
     val nm = c.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     if (Build.VERSION.SDK_INT >= 26) {
       nm.createNotificationChannel(NotificationChannel(Alarms.CHANNEL, "Alarma TODO OK", NotificationManager.IMPORTANCE_HIGH).apply {
-        setSound(null, null); enableVibration(true); lockscreenVisibility = Notification.VISIBILITY_PUBLIC; setBypassDnd(true) })
+        setSound(null, null); enableVibration(true); lockscreenVisibility = Notification.VISIBILITY_PUBLIC })
     }
     val full = PendingIntent.getActivity(c, id.hashCode(), Intent(c, AlarmActivity::class.java).putExtra("id", id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     val n = NotificationCompat.Builder(c, Alarms.CHANNEL).setSmallIcon(android.R.drawable.ic_dialog_alert)
@@ -793,7 +863,7 @@ class AlarmReceiver : BroadcastReceiver() {
     nm.notify(id.hashCode(), n)
     AlarmRinger.start(c)
     // reintento: si nadie da acuse en 5 min vuelve a sonar
-    Alarms.set(c, id, System.currentTimeMillis() + 5 * 60 * 1000)
+    Alarms.set(c, Alarms.retryId(id), System.currentTimeMillis() + 5 * 60 * 1000)
   }
 }
 ```
@@ -854,8 +924,11 @@ class AlarmActivity : Activity() {
     val btn = Button(this).apply {
       text = "RECIBIDA"; textSize = 24f
       setOnClickListener {
-        AlarmRinger.stop(); Alarms.cancel(this@AlarmActivity, id)
+        AlarmRinger.stop(); Alarms.cancelSlot(this@AlarmActivity, Alarms.retryId(id))
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).cancel(id.hashCode())
+        // la alarma principal solo se borra si ya se consumió; si hay un límite futuro (rearme) se conserva
+        val st = AlarmStore.get(this@AlarmActivity, id)
+        if (st != null && st.getLong("fireAtMillis") <= System.currentTimeMillis()) AlarmStore.remove(this@AlarmActivity, id)
         AlarmStore.addAck(this@AlarmActivity, id); finish()
       }
     }
@@ -864,7 +937,7 @@ class AlarmActivity : Activity() {
 }
 ```
 
-Nota: `Alarms.cancel` borra el registro local; el acuse queda en `acks` y Dart lo sincroniza (Task 9). El estado de la expedición no se toca aquí.
+Nota: "Recibida" solo cancela la ranura de repetición y, si ya se consumió, el registro local; el acuse queda en `acks` y Dart lo sincroniza (Task 9). El estado de la expedición no se toca aquí.
 
 - [ ] **Step 6: `BootReceiver.kt`**
 
@@ -898,7 +971,7 @@ class AlarmChannel(private val c: Context) : MethodChannel.MethodCallHandler {
     when (call.method) {
       "schedule" -> { val m = call.arguments as Map<*, *>; val id = m["expeditionId"] as String
         AlarmStore.save(c, id, JSONObject(m)); Alarms.set(c, id, (m["fireAtMillis"] as Number).toLong()); r.success(null) }
-      "cancel" -> { Alarms.cancel(c, call.arguments as String); r.success(null) }
+      "cancel" -> { Alarms.cancelAll(c, call.arguments as String); r.success(null) }
       "permissions" -> r.success(mapOf("exactAlarm" to canExact(), "fullScreen" to canFull(), "notifications" to notifOk(), "batteryExempt" to batteryOk()))
       "openSetting" -> { open(call.arguments as String); r.success(null) }
       "testAlarm" -> { val spec = JSONObject(mapOf("expeditionId" to "__test__", "explorerName" to "PRUEBA", "name" to "Prueba de alarma", "zone" to "-", "fireAtMillis" to System.currentTimeMillis() + 60000))
@@ -960,12 +1033,13 @@ class AndroidAlarmScheduler implements AlarmScheduler {
 - Produces:
   - `AuthRepository`: `Stream<User?> authState()`, `Future<void> signInWithGoogle()`, `Future<void> signOut()`, `Future<String?> role()`, `Future<void> setRole(String role, String displayName)`.
   - `PairingRepository`: `Future<String> createCode()`, `Future<void> redeem(String raw)`, `Stream<List<Pairing>> contacts()`, `Future<void> unpair(String contactUid)`.
-  - `ExpeditionRepository`: `Future<String> create(...)`, `Stream<Expedition?> activeForExplorer()`, `Stream<List<Expedition>> watchForContact()`, `void checkIn(Expedition e, {double? lat, double? lng, required int battery})`, `void extend(Expedition e, DateTime newDeadline)`, `Future<void> start(String id)`, `Future<void> finish(String id)`, `Future<void> markAlarm(String id)`.
-  - `ArmingRepository implements ArmReporter` + `Stream<Map<String, ContactArm>> watchContacts(String expeditionId)`, `Future<void> ack(String expeditionId)`.
+  - `ExpeditionRepository`: `Future<String> create(...)`, `Stream<Expedition?> activeForExplorer()`, `Stream<List<Expedition>> watchForContact()`, `void checkIn(Expedition e, {double? lat, double? lng, required int battery})`, `void extend(Expedition e, DateTime newDeadline)`, `Future<void> start(String id)`, `Future<void> finish(String id)`, `Future<void> markAlarm(String id)`, `Future<void> deleteExpedition(String id)`; `CheckinOutbox` con `add`, `markFailed`, `pending()`.
+  - `ArmingRepository implements ArmReporter` + `Stream<Map<String, ContactArm>> watchContacts(String expeditionId)`, `Future<void> ack(String expeditionId)`, `Future<void> heartbeat(String expeditionId)`; el modelo `ContactArm` incluye `armedAt, armedDeadlineMs, ackAt, lastSeenAt`.
 
 **Acceptance Criteria:**
 - `redeem` escribe el canje y el vínculo en un único batch y falla con mensaje claro si el código es inválido.
-- `checkIn` escribe el check-in y actualiza los `last*` y el límite en un único batch y **no espera** a la red (devuelve de inmediato; la cola offline de Firestore lo reintenta).
+- `checkIn` escribe dos operaciones separadas (A: registro; B: límite, `last*` y rearme) y **no espera** a la red; todo error se recoge en la bandeja de salida local y ningún check-in rechazado desaparece en silencio.
+- `expireAt` se escribe en checkins, contacts y expediciones según la retención de las restricciones globales.
 - `finish` fija `status: finished` y `expireAt = ahora + 30 días`.
 - Las reglas de Task 4 aceptan todas las escrituras de estos métodos (se comprueba en el emulador en Task 14).
 
@@ -999,17 +1073,24 @@ void checkIn(Expedition e, {double? lat, double? lng, required int battery}) {
   final now = DateTime.now().toUtc();
   final next = nextDeadline(currentDeadline: e.deadlineAt, effectiveCheckin: now, interval: e.checkinInterval);
   final ref = _db.doc('expeditions/${e.id}');
-  final b = _db.batch();
-  b.set(ref.collection('checkins').doc(), {'at': Timestamp.fromDate(now), 'serverAt': FieldValue.serverTimestamp(), 'lat': lat, 'lng': lng, 'battery': battery});
-  b.update(ref, {'deadlineAt': Timestamp.fromDate(next), 'lastCheckinAt': Timestamp.fromDate(now), 'lastLat': lat, 'lastLng': lng, 'lastBattery': battery});
-  b.commit(); // sin await: la cola offline de Firestore lo reintenta
+  final checkinRef = ref.collection('checkins').doc();
+  _outbox.add(OutboxEntry(id: checkinRef.id, expeditionId: e.id, at: now, expectedDeadline: next)); // bandeja local persistente
+  // A) registro del check-in: las reglas siempre lo aceptan, así no se pierde la posición
+  checkinRef.set(checkinRecordPayload(_codec, now: now, lat: lat, lng: lng, battery: battery))
+      .catchError((Object err) => _outbox.markFailed(checkinRef.id, err));
+  // B) límite, última posición y rearme (alarm → active); la regla acota el límite a request.time + intervalo
+  ref.update(checkinDeadlinePayload(_codec, now: now, next: next, lat: lat, lng: lng, battery: battery, rearm: e.status == ExpeditionStatus.alarm))
+      .catchError((Object err) => _outbox.markFailed(checkinRef.id, err));
+  // sin await: la cola offline de Firestore lo reintenta
 }
 ```
 
-La hora efectiva servidor la aplica la regla (`deadlineAt <= request.time + intervalo`): si el reloj de Tony iba adelantado, el batch se rechaza al sincronizar y la UI lo muestra como error; `effectiveCheckinTime` se usa en la pantalla para avisar de un reloj desfasado comparando con `serverAt` de los check-ins ya sincronizados.
+Las funciones `checkinRecordPayload` y `checkinDeadlinePayload` son puras y reciben un `PayloadCodec` (producción: `Timestamp`/`FieldValue`; test: marcadores JSON), de modo que Node comprueba la misma forma exacta (ver Task 4, Step 6). El registro lleva `expireAt = now + 45 d`; B escribe `expireAt = next + 30 d`, y si la expedición estaba en `alarm` añade `status: active` y `alarmFiredAt: delete`.
 
-- [ ] **Step 5:** `start(id)` → `status: active`, `startAt: ahora`. `finish(id)` → `status: finished`, `expireAt: Timestamp(ahora+30d)`. `markAlarm(id)` → `status: alarm` (solo lo llama el contacto cuando `isOverdue`). `extend(e, newDeadline)` actualiza `deadlineAt` (la regla acota).
-- [ ] **Step 6:** `ArmingRepository`: `reportArmed(id, ms)` → `set(expeditions/{id}/contacts/{uid}, {armedAt: serverTimestamp, armedDeadlineMs: ms})`; `clearArmed` → `set` con `armedAt: null`; `ack(id)` → `set(..., {ackAt: serverTimestamp}, merge)`.
+`CheckinOutbox` (en `shared_preferences`) guarda `{id, expeditionId, at, expectedDeadline, failed?}`. Una entrada se da por **confirmada** cuando un snapshot de servidor (`!metadata.isFromCache && !metadata.hasPendingWrites`) contiene ese check-in y un límite ≥ `expectedDeadline`. Si tras estar en línea más de 2 minutos no se confirma, o `markFailed` se llama, la pantalla muestra en rojo "TODO OK no confirmado". Si el desfase entre `at` y `serverAt` de los check-ins confirmados supera 2 min, el motivo mostrado es "El reloj de tu móvil va adelantado. Activa la hora automática" con atajo a los ajustes y un botón "Reintentar" que repite el check-in con la hora corregida (`effectiveCheckinTime`).
+
+- [ ] **Step 5:** `start(id)` → `status: active`, `startAt: ahora`. `finish(id)` → `status: finished`, `expireAt: Timestamp(ahora+30d)`. `markAlarm(id)` → `status: alarm`, `alarmFiredAt: serverTimestamp` (solo lo llama el contacto cuando `isOverdue`). `extend(e, newDeadline)` actualiza `deadlineAt` y `expireAt = newDeadline + 30 d` (la regla acota). `create` fija `expireAt = deadlineAt + 30 d`. `deleteExpedition(id)` (solo `finished`) borra primero `checkins` y `contacts` y después el documento. Todos construyen su payload con funciones puras y `PayloadCodec`.
+- [ ] **Step 6:** `ArmingRepository`: `reportArmed(id, ms)` → `set(expeditions/{id}/contacts/{uid}, {armedAt: serverTimestamp, armedDeadlineMs: ms, expireAt: ahora+45d}, merge)`; `clearArmed` → `set` con `armedAt: null`; `ack(id)` → `set(..., {ackAt: serverTimestamp}, merge)`; `heartbeat(id)` → `set(..., {lastSeenAt: serverTimestamp, expireAt: ahora+45d}, merge)`.
 - [ ] **Step 7: Verify** `flutter analyze`. **Step 8: Commit** `feat: repositorios Firebase`.
 
 ---
@@ -1025,14 +1106,16 @@ La hora efectiva servidor la aplica la regla (`deadlineAt <= request.time + inte
 - Produces: `class WatchService { static Future<void> startIfNeeded(); static Future<void> stop(); }` y un `TaskHandler` que al iniciar: (a) suscribe `watchForContact()` y llama `orchestrator.apply(e)` para cada cambio; (b) si `e.status == active && e.isOverdue(now)` llama `markAlarm(e.id)`; (c) sincroniza acuses pendientes.
 
 **Acceptance Criteria:**
-- Mientras haya una expedición `planned`/`active` el contacto ve una notificación persistente "TODO OK vigilando".
+- Mientras haya un vínculo activo el contacto ve una notificación persistente "TODO OK vigilando", de modo que una expedición nueva le llega sin abrir la app. Puede pausarlo en Ajustes (la pantalla avisa de que sin vigilancia no se reprogramará la alarma).
+- El servicio escribe el latido `lastSeenAt` cada 5 minutos para cada expedición `planned`/`active`.
+- Tras reiniciar el móvil, una notificación normal avisa "Abre TODO OK para reanudar la vigilancia" (Android 14/15 no permite arrancar este servicio desde `BOOT_COMPLETED`); la alarma local ya programada sigue siendo válida.
 - Un check-in de Tony reprograma la alarma local del contacto con la app en segundo plano.
-- Al terminar todas las expediciones, el servicio se detiene.
+- El servicio se detiene solo al desvincular todos los contactos o al pausarlo el usuario.
 - Los acuses guardados en nativo se suben a Firestore cuando hay red.
 
-- [ ] **Step 1:** Configurar `FlutterForegroundTask.init` (`serviceTypes: [ForegroundServiceTypes.dataSync]`, canal `todook_watch`, intervalo de evento 60 s) y `startService(notificationTitle: 'TODO OK vigilando', ...)`.
-- [ ] **Step 2:** En el `TaskHandler.onStart`, inicializar Firebase (`Firebase.initializeApp`) y suscribirse al stream; cada 60 s (`onRepeatEvent`) repetir las comprobaciones (b) y (c) para cubrir el caso de que el límite venza sin eventos nuevos.
-- [ ] **Step 3:** `startIfNeeded()` se llama desde la pantalla del contacto al detectar una expedición `planned`/`active` y al arrancar la app; `stop()` cuando no queda ninguna.
+- [ ] **Step 1:** Configurar `FlutterForegroundTask.init` (`serviceTypes: [ForegroundServiceTypes.specialUse]` con la propiedad `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` declarada en el manifest, canal `todook_watch`, intervalo de evento 60 s) y `startService(notificationTitle: 'TODO OK vigilando', ...)`. `dataSync` no se usa: Android 15 le pone un límite de unas 6 h por cada 24 h. Si el spike (Task 1b) dio NO-GO, esta tarea se reemplaza por un servicio nativo en Kotlin.
+- [ ] **Step 2:** En el `TaskHandler.onStart`, llamar a `DartPluginRegistrant.ensureInitialized()`, inicializar Firebase (`Firebase.initializeApp`) y suscribirse al stream; cada 60 s (`onRepeatEvent`) repetir las comprobaciones (b) y (c) para cubrir el caso de que el límite venza sin eventos nuevos, y cada 5 min llamar a `ArmingRepository.heartbeat` de las expediciones `planned`/`active`.
+- [ ] **Step 3:** `startIfNeeded()` se llama al arrancar la app del contacto y al canjear un código; `stop()` solo al pausar o al desvincular todos.
 - [ ] **Step 4: Verify** `flutter analyze`; prueba manual descrita en `docs/DEVICE_CHECKLIST.md` (Task 14, ítem "check-in con app cerrada").
 - [ ] **Step 5: Commit** `feat: servicio de vigilancia del contacto`.
 
@@ -1075,10 +1158,10 @@ La hora efectiva servidor la aplica la regla (`deadlineAt <= request.time + inte
 
 **Acceptance Criteria:**
 - Crear expedición: nombre, zona, salida, hora límite (> ahora), intervalo opcional (15–1440 min) y selección de contactos. Se crea como `planned`.
-- Tony ve "Contacto X armado ✓ / sin confirmar ✗" en tiempo real. "Iniciar" solo se habilita con ≥1 contacto armado **para el límite vigente** (`armedDeadlineMs == deadlineAt.millisecondsSinceEpoch`); si no, ofrece "Salir sin alarma activa" con diálogo de confirmación explícito. Aviso (no bloqueo) si hay un solo contacto.
+- Tony ve "Contacto X armado ✓ / sin confirmar ✗" en tiempo real. "Iniciar" solo se habilita con ≥1 contacto armado **para el límite vigente** (`armedDeadlineMs == deadlineAt.millisecondsSinceEpoch`) **y con latido reciente** (`lastSeenAt` de menos de 10 min; si no, "sin confirmar (visto hace X)"); si no, ofrece "Salir sin alarma activa" con diálogo de confirmación explícito. Aviso (no bloqueo) si hay un solo contacto.
 - Aviso al crear si la hora automática del móvil está desactivada (comparar con la hora de servidor devuelta por una escritura de prueba en `users/{uid}`, desfase > 2 min).
-- Botón TODO OK grande, un toque, sin esperar a la red; muestra "pendiente de enviar" mientras `hasPendingWrites` y "enviado" después.
-- Botón "Finalizar" con confirmación; pone `finished`.
+- Botón TODO OK grande, un toque, sin esperar a la red; muestra "pendiente de enviar" mientras haya una entrada sin confirmar en la bandeja de salida (`CheckinOutbox`), "confirmado" cuando un snapshot de servidor lo contiene, y en rojo "TODO OK no confirmado" con el motivo (ver Task 8, Step 4).
+- Botón "Finalizar" con confirmación; pone `finished`. En expediciones finalizadas, acción "Borrar expedición y datos" con confirmación (`deleteExpedition`).
 - Con intervalo configurado se muestra la próxima hora límite tras cada check-in.
 - `LimitsBanner` visible en la pantalla de la expedición.
 
@@ -1172,6 +1255,13 @@ Nota: si tras un check-in tardío el límite se amplió, `deadlineAt` ya es post
   10. Finalizar cancela la alarma en todos los contactos.
   11. Fabricante concreto: seguir `dontkillmyapp.com` y repetir 3 con el móvil bloqueado 1 h.
   12. iPhone (si aplica): llega la notificación local; anotar si se silencia.
+  13. Alarma sonando, Tony hace un check-in que rearma (límite nuevo +3 h): el contacto pulsa "Recibida"; la alarma del nuevo límite sigue programada y suena a su hora.
+  14. Servicio de vigilancia 24 h seguidas en Android 15 sin que el sistema lo pare; app barrida de recientes y check-in desde otro móvil: llega en menos de 30 s.
+  15. Reinicio del móvil: aparece "Abre TODO OK para reanudar la vigilancia"; la alarma ya programada sigue válida.
+  16. Reloj de Tony adelantado 10 h (hora automática desactivada): el TODO OK muestra "no confirmado" con el motivo, el registro del check-in sí llega y el botón "Reintentar" tras corregir la hora funciona.
+  17. Gate de salida: con el servicio del contacto parado más de 10 min aparece "sin confirmar (visto hace X)" aunque el armado antiguo exista.
+  18. En No Molestar suena por el canal de alarma (sin `setBypassDnd`); anotar el resultado por modelo.
+  19. Instalar con la clave de release desde Firebase App Distribution: el login con Google funciona.
 - [ ] **Step 2:** Ejecutar `cd firebase && npm test` y `flutter test && flutter analyze`.
 - [ ] **Step 3: Commit** `docs: checklist de validación en móvil real`.
 
@@ -1201,6 +1291,27 @@ Nota: si tras un check-in tardío el límite se amplió, `deadlineAt` ya es post
 
 **Recortes deliberados:** ninguno. La fase 2 (GPS en segundo plano, mapas, GPX) y la fase 3 (Cloud Function, escalado) quedan fuera por decisión previa de Tony.
 
-**Placeholders:** ninguno; los pasos de UI de las Tasks 8–13 dan interfaz, comportamiento y tests exactos, y el código largo de pantallas se escribe durante la ejecución siguiendo esas interfaces.
+**Huecos declarados (no es un plan "sin huecos"):** las Tasks 10 a 13 y partes de la 8 y la 9 dan interfaz, comportamiento, criterios de aceptación y tests, pero **no incluyen el código de las pantallas ni de los repositorios completos**; se escriben al ejecutar, con TDD donde hay lógica. El código Kotlin de la Task 7 no se ha compilado (no hay SDK en este entorno).
 
 **Consistencia de tipos:** `AlarmSpec`, `ArmReporter`, `AlarmOrchestrator`, `Expedition` y los métodos de los repositorios usan los mismos nombres en todas las tasks. `alarmFiredAt` está en el modelo (Task 5), en la regla del contacto (Task 4) y se usa en `markAlarm` (Task 8) y `contactStatus` (Task 12). Al ejecutar la Task 4 se añade además un test: el contacto puede escribir `status` + `alarmFiredAt` tras vencer el límite y ningún otro campo. En la Task 12, `contactStatus` compara `lastCheckinAt > alarmFiredAt`.
+
+## Stress Test Results: Plan de la fase 1
+
+### Resolved Decisions
+- **Alarma y acuse:** dos ranuras (principal y repetición); "Recibida" solo cancela la repetición; un check-in de Tony con la expedición en `alarm` la rearma a `active`. (Fallo grave encontrado: "Recibida" destruía la alarma del límite reprogramado y tras una falsa alarma la expedición quedaba sin protección.)
+- **Servicio del contacto:** spike previo go/no-go (Task 1b), servicio permanente mientras haya vínculo, tipo `specialUse` (no `dataSync`, por el límite de Android 15), aviso de reanudación tras reiniciar, plan B nativo en Kotlin.
+- **Pruebas:** contrato Dart↔reglas con fixtures JSON compartidos; sin mocks de Firestore.
+- **Retención:** `expireAt` en checkins, contacts y expediciones (más TTL en pairingCodes); el TTL no es en cascada; borrado manual de expediciones finalizadas; retraso del TTL de 24–72 h declarado.
+- **Firma y distribución:** un solo keystore de release registrado en Firebase, Firebase App Distribution, `POST_NOTIFICATIONS` en tiempo de ejecución, sin `setBypassDnd`.
+- **Escrituras rechazadas:** check-in en dos escrituras (A registro, B límite), bandeja de salida local confirmada por snapshot de servidor, mensaje de reloj adelantado y reintento.
+- **Seguridad y riesgo:** sin regresiones; latido `lastSeenAt` del contacto y gate de salida que exige armado vigente y latido de menos de 10 min (limitación: no hay latido visible sin cobertura).
+
+### Changes Made
+Nueva Task 1b (spike); Tasks 4, 6, 7, 8, 9, 11 y 14 y las restricciones globales actualizadas; autocrítica corregida (el plan declara los huecos de código de pantallas y que el Kotlin no se ha compilado).
+
+### Deferred / Parking Lot
+Capa servidor y escalado (fase 3); iOS fiable (requiere Apple Developer); SMS de respaldo (fase 2); latido visible durante la expedición (requeriría servidor).
+
+### Confidence Assessment
+- Overall: Medium. La lógica y las reglas son comprobables en la nube; la fiabilidad real de la alarma y del servicio depende del spike y del checklist en móvil físico.
+- Áreas de preocupación: viabilidad del servicio en segundo plano (Task 1b) y comportamiento de cada fabricante de Android.

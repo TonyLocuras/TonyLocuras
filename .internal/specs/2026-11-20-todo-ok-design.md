@@ -119,3 +119,12 @@ Cloud Function + push de respaldo + escalado (fase 3); Apple Developer y Critica
 ### Confidence Assessment
 - Overall: Medium. La lógica es sólida, pero la fiabilidad real depende de móviles físicos y fabricantes que no se pueden probar desde la nube.
 - Áreas de preocupación: riesgo 1 (sin servidor) y la instalación en iPhone.
+
+## Cambios por revisión del plan (2026-11-20)
+Estos puntos del stress-test del plan prevalecen sobre el texto anterior de esta spec:
+- Estado adicional `planned` (antes de iniciar) y campo `alarmFiredAt`.
+- Alarma con dos ranuras (principal y repetición); "Recibida" no cancela una alarma principal futura; un check-in de Tony tras `alarm` rearma la expedición a `active`.
+- El contacto necesita un servicio en primer plano permanente mientras haya vínculo (tipo `specialUse`); sin él no se reprograma la alarma ni llega una expedición nueva. Se valida en un spike previo.
+- Retención: `expireAt` en checkins/contacts (45 d) y en expediciones (`deadlineAt` + 30 d); TTL no es en cascada y puede tardar 24–72 h.
+- El gate de salida exige armado vigente y latido del contacto de menos de 10 min.
+- Una sola clave de firma de release en Firebase y distribución con Firebase App Distribution.
