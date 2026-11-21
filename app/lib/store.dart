@@ -101,12 +101,14 @@ class Store extends ChangeNotifier {
     }
   }
 
-  /// Copia los datos de la v0.1 (base local sin cuentas) a esta cuenta, una sola vez.
+  /// Copia los datos locales anteriores (v0.1 sin cuentas y modo local) a esta cuenta, una sola vez.
   Future<void> _importLegacy(String dir) async {
     final flag = await _meta('legacy_imported');
     if (flag != null) return;
-    final f = File(p.join(dir, 'tonylocuras.db'));
-    if (await f.exists()) {
+    for (final name in ['tonylocuras.db', 'tonylocuras_local.db']) {
+      if (name == 'tonylocuras_$uid.db') continue;
+      final f = File(p.join(dir, name));
+      if (!await f.exists()) continue;
       try {
         final old = await openDatabase(f.path, readOnly: true);
         final rows = await old.query('records');
