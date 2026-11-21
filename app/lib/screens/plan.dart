@@ -17,7 +17,9 @@ const exerciseTypes = {
 const capabilities = ['prioritaria', 'complementaria', 'suplementaria', 'otra'];
 
 class PlanScreen extends StatelessWidget {
-  const PlanScreen({super.key});
+  /// Los clientes solo ven el plan que les envía su entrenador.
+  final bool readOnly;
+  const PlanScreen({super.key, this.readOnly = false});
 
   @override
   Widget build(BuildContext context) {
@@ -36,27 +38,32 @@ class PlanScreen extends StatelessWidget {
           title: Text(s['title'] as String? ?? 'Sesión', style: const TextStyle(fontWeight: FontWeight.w800)),
           subtitle: Text('${DateFormat('EEE d MMM', 'es').format(d)}${(s['time'] ?? '') == '' ? '' : ' · ${s['time']}'} · $n ejercicios${s['phase'] != null && s['phase'] != '' ? ' · ${s['phase']}' : ''}'),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SessionEditor(session: s))),
+          onTap: () => Navigator.push(
+              context, MaterialPageRoute(builder: (_) => readOnly ? SessionViewer(session: s) : SessionEditor(session: s))),
         ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Plan')),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.accent,
-        foregroundColor: Colors.white,
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SessionEditor())),
-        icon: const Icon(Icons.add),
-        label: const Text('Sesión', style: TextStyle(fontWeight: FontWeight.w800)),
-      ),
+      floatingActionButton: readOnly
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SessionEditor())),
+              icon: const Icon(Icons.add),
+              label: const Text('Sesión', style: TextStyle(fontWeight: FontWeight.w800)),
+            ),
       body: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 100), children: [
         if (all.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(24),
+          Padding(
+            padding: const EdgeInsets.all(24),
             child: Text(
-              'Aún no hay sesiones. Añade las de esta semana (las del plan de tu entrenador) con el botón «Sesión». En enero se podrá importar el plan desde PDF.',
-              style: TextStyle(color: AppColors.muted, fontSize: 16),
+              readOnly
+                  ? 'Todavía no tienes sesiones. Tu entrenador te las enviará y aparecerán aquí.'
+                  : 'Aún no hay sesiones. Añádelas con el botón «Sesión» o impórtalas desde un PDF en Más > Importar con IA.',
+              style: const TextStyle(color: AppColors.muted, fontSize: 16),
             ),
           ),
         if (upcoming.isNotEmpty) sectionTitle('Próximas'),
@@ -70,7 +77,12 @@ class PlanScreen extends StatelessWidget {
 
 class SessionEditor extends StatefulWidget {
   final Map<String, dynamic>? session;
-  const SessionEditor({super.key, this.session});
+
+  /// Si se indica, en vez de guardar en el almacén local se llama a esta función
+  /// (p. ej. para enviar la sesión a un cliente).
+  final Future<void> Function(Map<String, dynamic> session)? onSave;
+  final String? heading;
+  const SessionEditor({super.key, this.session, this.onSave, this.heading});
   @override
   State<SessionEditor> createState() => _SessionEditorState();
 }
@@ -96,14 +108,25 @@ class _SessionEditorState extends State<SessionEditor> {
   }
 
   Future<void> _save() async {
-    await context.read<Store>().put(Col.plan, {
+    final doc = {
+      ...?widget.session,
       'id': id,
       'date': dayKey(date),
       'time': time.text.trim(),
       'title': title.text.trim().isEmpty ? 'Sesión' : title.text.trim(),
       'phase': phase.text.trim(),
       'exercises': ex,
-    });
+    };
+    if (widget.onSave != null) {
+      try {
+        await widget.onSave!(doc);
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No se pudo guardar: $e')));
+        return;
+      }
+    } else {
+      await context.read<Store>().put(Col.plan, doc);
+    }
     if (mounted) Navigator.pop(context);
   }
 
@@ -124,8 +147,8 @@ class _SessionEditorState extends State<SessionEditor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.session == null ? 'Nueva sesión' : 'Editar sesión'), actions: [
-        if (widget.session != null)
+      appBar: AppBar(title: Text(widget.heading ?? (widget.session == null ? 'Nueva sesión' : 'Editar sesión')), actions: [
+        if (widget.session != null && widget.onSave == null)
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () async {
@@ -271,6 +294,7 @@ class _ExerciseEditorState extends State<ExerciseEditor> {
           onPressed: () {
             if (name.text.trim().isEmpty) return;
             Navigator.pop(context, {
+              ...?widget.exercise,
               'name': name.text.trim(),
               'type': type,
               'cap': cap,
@@ -286,6 +310,30 @@ class _ExerciseEditorState extends State<ExerciseEditor> {
           },
           child: const Text('LISTO'),
         ),
+      ]),
+    );
+  }
+}
+
+
+/// Vista de solo lectura de una sesión (clientes).
+class SessionViewer extends StatelessWidget {
+  final Map<String, dynamic> session;
+  const SessionViewer({super.key, required this.session});
+  @override
+  Widget build(BuildContext context) {
+    final ex = (session['exercises'] as List?) ?? [];
+    return Scaffold(
+      appBar: AppBar(title: Text('${session['title']}', style: const TextStyle(fontSize: 20))),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        Text('${session['date']}${(session['time'] ?? '') == '' ? '' : ' · ${session['time']}'}', style: const TextStyle(color: AppColors.muted)),
+        for (final e in ex)
+          Card(
+            child: ListTile(
+              title: Text('${(e as Map)['name']}', style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(_SessionEditorState._summary(Map<String, dynamic>.from(e))),
+            ),
+          ),
       ]),
     );
   }

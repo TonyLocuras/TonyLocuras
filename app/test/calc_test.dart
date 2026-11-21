@@ -65,4 +65,26 @@ void main() {
         [for (final r in defaultRules) r.id == 'pain' ? r.copyWith(enabled: false) : r]);
     expect(off.score, 100);
   });
+
+  test('cantidades de comida', () {
+    // arroz (carbohidrato), pollo (proteina), aceite (grasa)
+    const foods = [
+      Per100(130, 2.7, 28, 0.3),
+      Per100(165, 31, 0, 3.6),
+      Per100(884, 0, 0, 100),
+    ];
+    final g = solveQuantities(
+        foods: foods, maxGrams: [400, 300, 30], protein: 40, carbs: 80, fat: 15);
+    final m = macrosOf(foods, g);
+    expect((m.protein - 40).abs(), lessThan(6));
+    expect((m.carbs - 80).abs(), lessThan(8));
+    expect(g.every((x) => x >= 0), isTrue);
+    expect(g[2], lessThanOrEqualTo(30));
+  });
+
+  test('pauta de vuelta', () {
+    final p = returnProtocol(hours: 60, weightKg: 60, weightLostKg: 2);
+    expect(p.any((s) => s.text.contains('3.0 L')), isTrue);
+    expect(p.length, 5);
+  });
 }

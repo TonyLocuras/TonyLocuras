@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../auth.dart';
 import '../calc.dart';
+import '../notifs.dart';
 import '../store.dart';
 import '../theme.dart';
+import 'ai_screens.dart';
 import 'tests_tindeq.dart';
 
 class MasScreen extends StatelessWidget {
@@ -29,7 +32,9 @@ class MasScreen extends StatelessWidget {
         item(Icons.fitness_center, 'Tests', 'Batería de tests y resultados', const TestsScreen()),
         item(Icons.bluetooth, 'Tindeq', 'Conectar y medir con el Progressor', const TindeqScreen()),
         item(Icons.terrain, 'Expediciones', 'Registro y recuperación', const ExpedicionesScreen()),
-        item(Icons.settings, 'Ajustes', 'Peso, semáforo, copia de seguridad', const AjustesScreen()),
+        item(Icons.auto_awesome, 'Importar con IA', 'PDF o foto: plan, estudio, etiqueta, analítica...', const AiImportScreen()),
+        item(Icons.biotech, 'Estudios y referencias', 'Criterios de recuperación y valores del estudio', const EstudiosScreen()),
+        item(Icons.settings, 'Ajustes y cuenta', 'Peso, semáforo, recordatorios, copia, sesión', const AjustesScreen()),
       ]),
     );
   }
@@ -287,10 +292,19 @@ class _CompEditorState extends State<CompEditor> {
               },
               'notes': notes.text.trim(),
             });
+            await Notifs.instance.rescheduleAll(st);
             if (context.mounted) Navigator.pop(context);
           },
           child: const Text('GUARDAR'),
         ),
+        if (widget.comp != null && !played) ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CompChecklistScreen(comp: widget.comp!))),
+            icon: const Icon(Icons.checklist),
+            label: const Text('CHECKLIST DE COMPETICIÓN'),
+          ),
+        ],
       ]),
     );
   }
@@ -455,7 +469,12 @@ class _ExpEditorState extends State<ExpEditor> {
               'weightAfter': wAfter,
               'notes': notes.text.trim(),
             });
-            if (context.mounted) Navigator.pop(context);
+            if (context.mounted) {
+              Navigator.pop(context);
+              if (end != null) {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => RecoveryScreen(expedition: {'start': start.toIso8601String(), 'end': end!.toIso8601String(), 'weightBefore': wBefore, 'weightAfter': wAfter, 'food': food, 'water': water})));
+              }
+            }
           },
           child: const Text('GUARDAR'),
         ),
@@ -464,7 +483,132 @@ class _ExpEditorState extends State<ExpEditor> {
   }
 }
 
-// ---------------------------------------------------------------- Ajustes
+// ---------------------------------------------------------------- Vuelta de expedición
+
+class RecoveryScreen extends StatelessWidget {
+  final Map<String, dynamic> expedition;
+  const RecoveryScreen({super.key, required this.expedition});
+  @override
+  Widget build(BuildContext context) {
+    final st = context.watch<Store>();
+    final start = DateTime.tryParse('${expedition['start']}');
+    final end = DateTime.tryParse('${expedition['end']}');
+    final hours = (start != null && end != null) ? end.difference(start).inMinutes / 60 : 0.0;
+    final wb = (expedition['weightBefore'] as num?)?.toDouble() ?? 0;
+    final wa = (expedition['weightAfter'] as num?)?.toDouble() ?? 0;
+    final lost = (wb > 0 && wa > 0 && wb > wa) ? wb - wa : null;
+    final steps = returnProtocol(hours: hours, weightKg: wa > 0 ? wa : st.weightKg, weightLostKg: lost);
+    final studies = st.list(Col.studies);
+    final rules = <String>[
+      for (final sd in studies)
+        for (final r in ((sd['recovery_rules'] as List?) ?? [])) '${(r as Map)['text']}${r['page'] != null ? ' (${sd['title']}, p. ${(r['page'] as num).toInt()})' : ' (${sd['title']})'}'
+    ];
+    return Scaffold(
+      appBar: AppBar(title: const Text('Vuelta de expedición')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        Text('Duración ${hours.toStringAsFixed(0)} h${lost != null ? ' · peso perdido ${lost.toStringAsFixed(1)} kg' : ''}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 8),
+        if (rules.isEmpty)
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(14),
+              child: Text('PROVISIONAL: pauta general sin respaldo del estudio. Importa tu estudio en Importar con IA y aquí aparecerán sus criterios con su página.', style: TextStyle(color: AppColors.amber)),
+            ),
+          ),
+        for (final r in rules) Card(child: ListTile(leading: const Icon(Icons.menu_book, color: AppColors.accent), title: Text(r, style: const TextStyle(fontSize: 14)))),
+        sectionTitle('Pauta escalonada (provisional)'),
+        for (final x in steps)
+          Card(
+            child: ListTile(
+              title: Text(x.when, style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.accent)),
+              subtitle: Text(x.text, style: const TextStyle(fontSize: 15)),
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+// ---------------------------------------------------------------- Estudios
+
+class EstudiosScreen extends StatelessWidget {
+  const EstudiosScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final st = context.watch<Store>();
+    final studies = st.list(Col.studies);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Estudios y referencias')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        if (studies.isEmpty)
+          const Padding(padding: EdgeInsets.all(8), child: Text('Aún no has importado ningún estudio. Hazlo en Importar con IA > Estudio biomecánico. Sus criterios alimentan la recuperación tras expediciones y las referencias por nivel.', style: TextStyle(color: AppColors.muted, fontSize: 16))),
+        for (final s in studies)
+          Card(
+            child: ExpansionTile(
+              title: Text('${s['title']}', style: const TextStyle(fontWeight: FontWeight.w800)),
+              subtitle: Text('${((s['values'] as List?) ?? []).length} valores · ${((s['references'] as List?) ?? []).length} referencias · ${((s['recovery_rules'] as List?) ?? []).length} criterios'),
+              children: [
+                Padding(padding: const EdgeInsets.all(12), child: Text('${s['summary'] ?? ''}')),
+                for (final r in ((s['recovery_rules'] as List?) ?? [])) ListTile(dense: true, title: Text('${(r as Map)['text']}'), subtitle: r['page'] == null ? null : Text('p. ${r['page']}')),
+                TextButton.icon(onPressed: () => st.remove(Col.studies, s['id'] as String), icon: const Icon(Icons.delete_outline), label: const Text('BORRAR ESTUDIO')),
+              ],
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+// ---------------------------------------------------------------- Checklist de competición
+
+class CompChecklistScreen extends StatefulWidget {
+  final Map<String, dynamic> comp;
+  const CompChecklistScreen({super.key, required this.comp});
+  @override
+  State<CompChecklistScreen> createState() => _CompChecklistScreenState();
+}
+
+class _CompChecklistScreenState extends State<CompChecklistScreen> {
+  static const defaults = {
+    'Equipaje': ['Pies de gato', 'Magnesio y bolsa', 'Cepillo', 'Cinta', 'Ropa de competición', 'Ropa de abrigo', 'Documentación / licencia', 'Agua y electrolitos', 'Comida del día'],
+    'Calentamiento': ['Movilidad general 5 min', 'Activación hombro y escápula', 'Dedos: suspensiones suaves 50-70 %', 'Bloques fáciles progresivos', 'Bloques cercanos a tu límite (2-3)'],
+    'D-7 / D-3 / D-1': ['D-7: semana de pico, mantén intensidad, baja volumen', 'D-3: descarga y sueño', 'D-1: viaje, comida conocida, equipaje listo'],
+  };
+  late Map<String, dynamic> state;
+
+  @override
+  void initState() {
+    super.initState();
+    state = Map<String, dynamic>.from((widget.comp['checklist'] as Map?) ?? {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final st = context.read<Store>();
+    return Scaffold(
+      appBar: AppBar(title: Text('${widget.comp['name']}', style: const TextStyle(fontSize: 18))),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        for (final e in defaults.entries) ...[
+          sectionTitle(e.key),
+          for (final item in e.value)
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: state[item] == true,
+              onChanged: (v) async {
+                setState(() => state[item] = v ?? false);
+                await st.put(Col.competitions, {...widget.comp, 'checklist': state});
+              },
+              title: Text(item),
+            ),
+        ],
+        sectionTitle('Nutrición del día'),
+        const Text('Usa la pestaña Nutrición y Suplementos para tus comidas y tomas. Hora de aislamiento y rondas: anótalas en las notas de la competición.', style: TextStyle(color: AppColors.muted)),
+      ]),
+    );
+  }
+}
+
+// ---------------------------------------------------------------- Ajustes (se redefine abajo)
 
 class AjustesScreen extends StatelessWidget {
   const AjustesScreen({super.key});
@@ -519,8 +663,85 @@ class AjustesScreen extends StatelessWidget {
         Stepper2(label: 'Umbral de detección (kg)', value: s('tindeqThresholdKg', 1), step: 0.5, min: 0.5, max: 20, onChanged: (x) => st.saveSettings({'tindeqThresholdKg': x})),
         sectionTitle('Pantalla'),
         Stepper2(label: 'Tamaño de texto', value: s('textScale', 1.0), step: 0.1, min: 0.8, max: 1.5, onChanged: (x) => st.saveSettings({'textScale': double.parse(x.toStringAsFixed(1))})),
+        sectionTitle('Recordatorios'),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: st.settings['remMorningOn'] != false,
+          onChanged: (v) async {
+            await st.saveSettings({'remMorningOn': v});
+            await Notifs.instance.rescheduleAll(st);
+          },
+          title: const Text('Bienestar por la mañana'),
+          subtitle: Text('A las ${st.settings['remMorning'] ?? '08:30'}'),
+        ),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final t = await showTimePicker(context: context, initialTime: const TimeOfDay(hour: 8, minute: 30));
+            if (t != null) {
+              await st.saveSettings({'remMorning': '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}'});
+              await Notifs.instance.rescheduleAll(st);
+            }
+          },
+          icon: const Icon(Icons.alarm),
+          label: const Text('CAMBIAR HORA'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final d = await showDatePicker(context: context, initialDate: DateTime.tryParse('${st.settings['testDate'] ?? ''}') ?? DateTime.now().add(const Duration(days: 14)), firstDate: DateTime(2024), lastDate: DateTime(2031));
+            if (d != null) {
+              await st.saveSettings({'testDate': dayKey(d)});
+              await Notifs.instance.rescheduleAll(st);
+            }
+          },
+          icon: const Icon(Icons.event),
+          label: Text(st.settings['testDate'] == null ? 'FECHA DE LA PRÓXIMA BATERÍA DE TESTS' : 'Batería de tests: ${st.settings['testDate']}'),
+        ),
+        sectionTitle('Cuenta y nube'),
+        if (context.read<AuthController>().cloud && context.read<AuthController>().sync != null) ...[
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.cloud_done, color: AppColors.accent),
+              title: Text(context.watch<AuthController>().sync!.status),
+              subtitle: Text(context.read<AuthController>().api.session?.email ?? ''),
+              trailing: IconButton(icon: const Icon(Icons.refresh), onPressed: context.read<AuthController>().sync!.sync),
+            ),
+          ),
+          OutlinedButton.icon(onPressed: () => context.read<AuthController>().logout(), icon: const Icon(Icons.logout), label: const Text('CERRAR SESIÓN')),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(foregroundColor: AppColors.amber),
+            onPressed: () async {
+              final ok = await showDialog<bool>(
+                context: context,
+                builder: (c) => AlertDialog(
+                  title: const Text('¿Borrar todos mis datos?'),
+                  content: const Text('Se borran de la nube y de este dispositivo. No se puede deshacer.'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('CANCELAR')),
+                    TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('BORRAR')),
+                  ],
+                ),
+              );
+              if (ok == true) {
+                try {
+                  await context.read<AuthController>().eraseMyData();
+                } catch (e) {
+                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No se pudo borrar: $e')));
+                }
+              }
+            },
+            icon: const Icon(Icons.delete_forever),
+            label: const Text('BORRAR MIS DATOS'),
+          ),
+        ] else
+          const Text('Sin nube en esta compilación: los datos viven solo en este dispositivo.', style: TextStyle(color: AppColors.muted)),
         sectionTitle('Copia de seguridad'),
         FilledButton.icon(onPressed: st.exportJson, icon: const Icon(Icons.upload), label: const Text('EXPORTAR TODO (JSON)')),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(onPressed: () => st.exportCsv(Col.tests), icon: const Icon(Icons.table_chart), label: const Text('EXPORTAR TESTS (CSV)')),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(onPressed: () => st.exportCsv(Col.logs), icon: const Icon(Icons.table_chart), label: const Text('EXPORTAR SESIONES (CSV)')),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: () async {
@@ -537,7 +758,7 @@ class AjustesScreen extends StatelessWidget {
           label: const Text('IMPORTAR COPIA (DEL PORTAPAPELES)'),
         ),
         const SizedBox(height: 24),
-        const Text('Versión 0.1 · datos solo en este dispositivo (sin nube todavía).', style: TextStyle(color: AppColors.muted, fontSize: 12)),
+        const Text('Versión 0.2', style: TextStyle(color: AppColors.muted, fontSize: 12)),
       ]),
     );
   }

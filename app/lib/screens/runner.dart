@@ -6,6 +6,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../notifs.dart';
 import '../store.dart';
 import '../theme.dart';
 
@@ -218,7 +219,7 @@ class _RunnerScreenState extends State<RunnerScreen> {
   Future<void> _finishSession() async {
     final st = context.read<Store>();
     final minutes = DateTime.now().difference(started).inMinutes;
-    await st.put(Col.logs, {
+    final saved = await st.put(Col.logs, {
       'date': dayKey(started),
       'planId': widget.session['id'],
       'title': widget.session['title'],
@@ -229,6 +230,7 @@ class _RunnerScreenState extends State<RunnerScreen> {
       'epg': null,
       'epl': null,
     });
+    Notifs.instance.scheduleEpg('${saved['id']}', '${widget.session['title']}');
     _say('Sesión terminada');
     if (mounted) {
       Navigator.pop(context);

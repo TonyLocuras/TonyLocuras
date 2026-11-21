@@ -5,11 +5,15 @@ import 'package:provider/provider.dart';
 import '../calc.dart';
 import '../store.dart';
 import '../theme.dart';
+import 'mas.dart' show RecoveryScreen;
 import 'runner.dart';
+import '../notifs.dart';
 import 'wellbeing.dart';
 
 class HoyScreen extends StatelessWidget {
-  const HoyScreen({super.key});
+  /// En la app de clientes no hay hitos de competición ni recuperación de expediciones.
+  final bool client;
+  const HoyScreen({super.key, this.client = false});
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +84,11 @@ class HoyScreen extends StatelessWidget {
         for (final s in sessions) _SessionCard(s: s, tl: tl),
         if (pending.isNotEmpty) sectionTitle('Pendiente de valorar'),
         for (final l in pending) _EpgCard(log: l),
-        sectionTitle('Próximo hito'),
-        const _NextMilestone(),
+        if (!client) ...[
+          if (st.hoursSinceLastExpedition(now) != null && st.hoursSinceLastExpedition(now)! < 72) const _RecoveryCard(),
+          sectionTitle('Próximo hito'),
+          const _NextMilestone(),
+        ],
       ]),
     );
   }
@@ -198,7 +205,10 @@ class _EpgCardState extends State<_EpgCard> {
           Stepper2(label: 'EPL local (1-10)', value: epl, min: 1, max: 10, onChanged: (x) => setState(() => epl = x)),
           const SizedBox(height: 12),
           FilledButton(
-            onPressed: () => context.read<Store>().put(Col.logs, {...widget.log, 'epg': epg, 'epl': epl}),
+            onPressed: () async {
+              await context.read<Store>().put(Col.logs, {...widget.log, 'epg': epg, 'epl': epl});
+              await Notifs.instance.cancelEpg('${widget.log['id']}');
+            },
             child: const Text('GUARDAR VALORACIÓN'),
           ),
         ]),
@@ -227,6 +237,36 @@ class _NextMilestone extends StatelessWidget {
         title: Text('${c['name']}', style: const TextStyle(fontWeight: FontWeight.w800)),
         subtitle: Text('${c['place'] ?? ''} · ${DateFormat('d MMM', 'es').format(d)}'),
         trailing: Text(days == 0 ? 'HOY' : 'D-$days', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.accent)),
+      ),
+    );
+  }
+}
+
+
+class _RecoveryCard extends StatelessWidget {
+  const _RecoveryCard();
+  @override
+  Widget build(BuildContext context) {
+    final st = context.watch<Store>();
+    Map<String, dynamic>? last;
+    DateTime? lastEnd;
+    for (final e in st.list(Col.expeditions)) {
+      final end = DateTime.tryParse('${e['end'] ?? ''}');
+      if (end != null && (lastEnd == null || end.isAfter(lastEnd))) {
+        lastEnd = end;
+        last = e;
+      }
+    }
+    if (last == null || lastEnd == null) return const SizedBox.shrink();
+    final h = DateTime.now().difference(lastEnd).inMinutes / 60;
+    return Card(
+      color: AppColors.surface2,
+      child: ListTile(
+        leading: const Icon(Icons.healing, color: AppColors.amber, size: 32),
+        title: Text('Vuelta de expedición · hace ${h.round()} h', style: const TextStyle(fontWeight: FontWeight.w800)),
+        subtitle: const Text('Pauta de rehidratación y recarga'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RecoveryScreen(expedition: last!))),
       ),
     );
   }

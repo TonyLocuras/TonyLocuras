@@ -4,6 +4,9 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// APP_KIND=client compila la app de clientes (otro paquete y otro nombre).
+val appKind: String = System.getenv("APP_KIND") ?: "coach"
+
 android {
     namespace = "com.tonylocuras.tonylocuras_entreno"
     compileSdk = 37
@@ -12,11 +15,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.tonylocuras.tonylocuras_entreno"
+        applicationId = if (appKind == "client") "com.tonylocuras.clientes" else "com.tonylocuras.tonylocuras_entreno"
+        manifestPlaceholders["appLabel"] = if (appKind == "client") "TonyLocuras Clientes" else "TonyLocuras Entreno"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -42,6 +47,10 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {

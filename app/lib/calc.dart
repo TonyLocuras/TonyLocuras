@@ -237,3 +237,101 @@ TrafficResult trafficLight(
 }
 
 String _fmt(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
+
+// ============================================================ Comidas y recuperación
+
+/// Macros por 100 g de un alimento.
+class Per100 {
+  final double kcal, protein, carbs, fat;
+  const Per100(this.kcal, this.protein, this.carbs, this.fat);
+}
+
+/// Ajusta los gramos de cada ingrediente para acercarse a los macros objetivo
+/// (proteína, hidratos, grasa) respetando un máximo de gramos por ingrediente.
+/// Descenso por coordenadas con límites: simple, estable y determinista.
+/// Devuelve gramos redondeados a 5 g.
+List<double> solveQuantities({
+  required List<Per100> foods,
+  required List<double> maxGrams,
+  required double protein,
+  required double carbs,
+  required double fat,
+  int passes = 400,
+}) {
+  final n = foods.length;
+  final g = List<double>.filled(n, 0);
+  if (n == 0) return g;
+  // vectores por gramo
+  final m = [for (final f in foods) [f.protein / 100, f.carbs / 100, f.fat / 100]];
+  final target = [protein, carbs, fat];
+  for (var it = 0; it < passes; it++) {
+    for (var i = 0; i < n; i++) {
+      final cur = [0.0, 0.0, 0.0];
+      for (var j = 0; j < n; j++) {
+        for (var k = 0; k < 3; k++) {
+          cur[k] += g[j] * m[j][k];
+        }
+      }
+      var dot = 0.0, norm = 0.0;
+      for (var k = 0; k < 3; k++) {
+        dot += (target[k] - cur[k]) * m[i][k];
+        norm += m[i][k] * m[i][k];
+      }
+      if (norm <= 0) continue;
+      g[i] = (g[i] + dot / norm).clamp(0.0, maxGrams[i]).toDouble();
+    }
+  }
+  return [for (final x in g) (x / 5).round() * 5.0];
+}
+
+/// Macros totales de unas cantidades.
+Macros macrosOf(List<Per100> foods, List<double> grams) {
+  var kcal = 0.0, p = 0.0, c = 0.0, f = 0.0;
+  for (var i = 0; i < foods.length; i++) {
+    final q = grams[i] / 100;
+    kcal += foods[i].kcal * q;
+    p += foods[i].protein * q;
+    c += foods[i].carbs * q;
+    f += foods[i].fat * q;
+  }
+  return Macros(kcal, p, c, f);
+}
+
+/// Reparto de la energía del día entre comidas (PROVISIONAL, editable).
+const Map<String, double> mealSplit = {'desayuno': 0.25, 'comida': 0.35, 'cena': 0.25, 'snack': 0.15};
+
+class RecoveryStep {
+  final String when;
+  final String text;
+  const RecoveryStep(this.when, this.text);
+}
+
+/// Pauta de vuelta de expedición. PROVISIONAL: valores generales de rehidratación
+/// y recarga, NO salen del estudio. Se sustituyen cuando se importe el estudio.
+List<RecoveryStep> returnProtocol({
+  required double hours,
+  required double weightKg,
+  double? weightLostKg,
+}) {
+  final lost = weightLostKg ?? 0;
+  final fluidL = lost > 0 ? lost * 1.5 : null; // 150 % del peso perdido
+  final carbsG = (weightKg * (hours >= 48 ? 1.0 : 1.2));
+  return [
+    RecoveryStep('0-1 h',
+        'Sorbos de agua con electrolitos (unos 500-700 mg de sodio por litro), 150-250 ml cada 10-15 min. No beber de golpe.'),
+    RecoveryStep(
+        '1-6 h',
+        fluidL == null
+            ? 'Sigue hidratándote de forma pautada. Registra el peso para calcular el volumen total (150 % del peso perdido).'
+            : 'Volumen objetivo ~${fluidL.toStringAsFixed(1)} L (150 % del peso perdido), repartido, con sodio. Máximo orientativo 1 L/h.'),
+    RecoveryStep('Primera comida (1-2 h)',
+        'Porción pequeña y fácil de digerir: ~${carbsG.round()} g de hidratos (pasta blanca, arroz, yogur o leche) y 20-25 g de proteína. Sin grasas pesadas.'),
+    RecoveryStep(
+        hours >= 48 ? '24-72 h' : '24 h',
+        hours >= 48
+            ? 'Reintroducción progresiva: sube las comidas poco a poco, 5-6 tomas pequeñas al día, y vuelve a tus macros normales a lo largo de 2-3 días.'
+            : 'Vuelve a tus macros de día de entreno; prioriza hidratos y proteína en las primeras 24 h.'),
+    const RecoveryStep('Señales de alerta',
+        'Mareo intenso, confusión, vómitos persistentes, orina muy escasa u oscura o latidos irregulares: atención médica.'),
+  ];
+}
