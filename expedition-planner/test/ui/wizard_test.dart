@@ -21,6 +21,7 @@ Widget _app() => ProviderScope(
     );
 
 void main() {
+  _expert();
   testWidgets('analizar ruta disabled until a route exists', (t) async {
     t.view.physicalSize = const Size(900, 1800);
     t.view.devicePixelRatio = 1;
@@ -46,5 +47,12 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('cota de 0'), findsOneWidget);
     expect(find.text('Protector solar SPF50+'), findsOneWidget);
+  });
+}
+
+void _expert() {
+  testWidgets('expert map button is present', (t) async {
+    await t.pumpWidget(_app());
+    expect(find.byTooltip('Modo experto (mapa)'), findsOneWidget);
   });
 }

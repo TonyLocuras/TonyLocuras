@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'ui/expert/map_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ui/state.dart';
 import 'ui/theme.dart';
@@ -30,6 +33,17 @@ class WizardPage extends ConsumerWidget {
         title: const Text('Prepara tu ruta',
             style: TextStyle(fontWeight: FontWeight.w900)),
         actions: [
+          IconButton(
+            tooltip: 'Modo experto (mapa)',
+            onPressed: () async {
+              final docs = await getApplicationDocumentsDirectory();
+              final dir = Directory('${docs.path}/tiles');
+              if (!context.mounted) return;
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => MapPage(cacheDir: dir)));
+            },
+            icon: const Icon(Icons.map),
+          ),
           IconButton(
             tooltip: 'Modo nocturno rojo',
             onPressed: () => ref.read(nightProvider.notifier).toggle(),
