@@ -5,6 +5,15 @@ const DATOS = {
   "promociones": [
     {
       "activa": true,
+      "etiqueta": "BLACK FRIDAY",
+      "titulo": "10 % de cashback",
+      "texto": "Solo jueves 26 y viernes 27. Hasta un 60 % en ofertas + 10 % extra con mi código tonylocura + te devuelven el 10 % de lo que gastes en un cupón para tu próxima compra (llega por email antes del 10 de diciembre).",
+      "boton": "Aprovechar ahora",
+      "enlace": "https://vitastrong.es/?coupon=Tonylocura",
+      "hasta": "2026-11-27"
+    },
+    {
+      "activa": true,
       "etiqueta": "BFWEEK",
       "titulo": "Sorteo 250€",
       "texto": "Se suma a mi código tonylocura. Aprovecha antes de que se acabe.",
