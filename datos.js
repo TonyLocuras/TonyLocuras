@@ -1,5 +1,5 @@
 // Este archivo lo crea el panel (admin.html). Lo más cómodo es cambiar la web desde ahí.
-// Última actualización: 21/11/2026, 10:59:20
+// Última actualización: 25/11/2026, 21:30:37
 
 const DATOS = {
   "promociones": [
@@ -63,6 +63,20 @@ const DATOS = {
         {
           "titulo": "Packs de expedición",
           "packs": [
+            {
+              "nombre": "Pack fuerza diaria ",
+              "incluye": "",
+              "precio": 53.96,
+              "enlace": "https://vitastrong.es/amb/fuerza-diaria",
+              "precioFinal": 50.55
+            },
+            {
+              "nombre": "Pack competición ",
+              "incluye": "",
+              "precio": 175.41,
+              "enlace": "https://vitastrong.es/amb/pack-competicion",
+              "precioFinal": 162.28
+            },
             {
               "nombre": "Pack esencial",
               "incluye": "creatina Creastrong, pre-workout (red berries), EAA Pro (red berries), Wheystrong Protein (chocolate), maltodextrina",
