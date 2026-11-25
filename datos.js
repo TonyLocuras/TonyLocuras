@@ -50,7 +50,7 @@ const DATOS = {
   "vitastrong": {
     "codigo": "tonylocura",
     "descuento": 10,
-    "texto": "Entra por mi enlace y escribe el código {TONYLOCURA} al pagar.",
+    "texto": "Entra por mi enlace y escribe el código {codigo} al pagar.",
     "boton": "Ir a Vitastrong",
     "enlace": "https://vitastrong.es/es/"
   },
