@@ -15,7 +15,14 @@ body{background:var(--bg);color:var(--ink);font-family:Barlow,system-ui,-apple-s
 a{color:inherit}
 button{font-family:inherit;cursor:pointer}
 .top{position:sticky;top:0;z-index:5;background:var(--ink);color:var(--white);display:flex;align-items:center;gap:10px;padding:12px 16px}
-.top b{font-family:"Barlow Condensed",sans-serif;font-size:22px;flex:1}
+.top b{font-family:"Barlow Condensed",sans-serif;font-size:22px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:420px){.top{gap:6px;padding:10px 12px}.top b{font-size:19px}.top a,.top button{padding:5px 9px;font-size:13px}}
+.links .row{display:flex;gap:10px;align-items:center;margin:10px 0}
+.links .row div{flex:1;min-width:0}
+.links .row b{display:block;font-size:16px}
+.links .row small{display:block;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.links .row button{flex:none;background:var(--ink);color:var(--white);border:0;border-radius:999px;padding:9px 14px;font-weight:600;font-size:14px}
+.where{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--white);background:var(--ink);border-radius:6px;padding:2px 8px;margin-bottom:6px}
 .top a,.top button{color:var(--white);background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;text-decoration:none}
 .wrap{max-width:620px;margin:0 auto;padding:18px 16px}
 h1,h2{font-family:"Barlow Condensed",sans-serif;line-height:1.1}
@@ -83,7 +90,8 @@ code{background:#eee8da;border-radius:5px;padding:1px 5px}
 <body>
 <header class="top">
   <b>Panel TonyLocuras</b>
-  <a href="./" target="_blank" rel="noopener">Ver web ↗</a>
+  <a href="./" target="_blank" rel="noopener">Redes ↗</a>
+  <a href="tienda.html" target="_blank" rel="noopener">Tienda ↗</a>
   <button id="logout" hidden>Salir</button>
 </header>
 <main class="wrap" id="app"><p class="empty">Cargando…</p></main>
@@ -163,6 +171,7 @@ function setup(error) {
 function norm(d) {
   d.promociones ||= []; d.youtube ||= {}; d.instagram ||= {}; d.tiktok ||= {};
   d.miembros ||= {}; d.vitastrong ||= {}; d.pestanas ||= [];
+  d.tienda = Object.assign({ titulo: "Mis carritos Vitastrong", boton: "Ver mis carritos" }, d.tienda || {});
   d.pestanas.forEach(t => { t.grupos ||= []; t.grupos.forEach(g => g.packs ||= []); });
   return d;
 }
@@ -237,8 +246,14 @@ function render() {
   const P = S.promociones;
   let h = "";
 
+  // TUS LINKS
+  const base = location.href.replace(/admin(\.html)?([?#].*)?$/, "");
+  h += `<section class="sec links"><h2>🔗 Tus links</h2><p class="sub">Cópialos para tu bio de Instagram y TikTok.</p>
+    <div class="row"><div><b>Redes</b><small>${esc(base)}</small></div><button data-copy="${esc(base)}">Copiar</button></div>
+    <div class="row"><div><b>Tienda Vitastrong</b><small>${esc(base)}tienda</small></div><button data-copy="${esc(base)}tienda">Copiar</button></div></section>`;
+
   // PROMOCIONES
-  h += `<section class="sec"><h2>🔥 Promociones</h2><p class="sub">Salen arriba del todo en tu web. Puedes tener varias.</p>`;
+  h += `<section class="sec"><span class="where">TIENDA</span><h2>🔥 Promociones</h2><p class="sub">Salen arriba del todo en la tienda. Puedes tener varias.</p>`;
   h += P.length ? P.map((p, i) => {
     const b = "promociones." + i, [st, cl] = promoState(p);
     return card("promo" + i,
@@ -256,17 +271,17 @@ function render() {
   h += `<button class="add" data-act="add-promo">+ Añadir promoción</button></section>`;
 
   // VITASTRONG
-  h += `<section class="sec"><h2>💊 Vitastrong y tu código</h2><p class="sub">Si cambias el %, todos los precios de los packs se recalculan solos.</p>` +
+  h += `<section class="sec"><span class="where">TIENDA</span><h2>💊 Vitastrong y tu código</h2><p class="sub">Si cambias el %, todos los precios de los packs se recalculan solos.</p>` +
     F("Código", "vitastrong.codigo", { ph: "tonylocura" }) +
     F("Descuento del código (%)", "vitastrong.descuento", { t: "num", ph: "10" }) +
     F("Texto", "vitastrong.texto", { t: "area", rows: 2, hint: "Donde pongas {codigo} saldrá tu código en negrita." }) +
     F("Texto del botón", "vitastrong.boton") +
-    F("Enlace", "vitastrong.enlace", { t: "url" }) + `</section>`;
+    F("Enlace", "vitastrong.enlace", { t: "url", hint: "Tu código se añade solo a este enlace (?coupon=...), así se aplica sin escribirlo." }) + `</section>`;
 
   // CARRITOS
   const tabs = S.pestanas;
   if (tabSel >= tabs.length) tabSel = Math.max(0, tabs.length - 1);
-  h += `<section class="sec"><h2>🛒 Carritos</h2><p class="sub">Elige la pestaña, abre un grupo y toca un pack para editarlo.</p>`;
+  h += `<section class="sec"><span class="where">TIENDA</span><h2>🛒 Carritos</h2><p class="sub">Elige la pestaña, abre un grupo y toca un pack para editarlo.</p>`;
   h += `<div class="chips">${tabs.map((t, i) => `<button class="tabchip ${i === tabSel ? "on" : ""}" data-act="tab" data-i="${i}">${esc(t.nombre || "Sin nombre")}</button>`).join("")}<button class="tabchip addt" data-act="add-tab">+ Pestaña</button></div>`;
   const t = tabs[tabSel];
   if (t) {
@@ -303,8 +318,13 @@ function render() {
     F("Título de la sección", "carritosTitulo") +
     F("Texto de la sección", "carritosTexto", { t: "area", rows: 2 }) + `</section>`;
 
+  // TEXTOS DE LA TIENDA
+  h += `<section class="sec"><span class="where">TIENDA + REDES</span><h2>🛍️ Título de la tienda</h2><p class="sub">El título sale arriba en la tienda. El botón es el de la tarjeta roja de tu página de redes que lleva a la tienda.</p>` +
+    F("Título", "tienda.titulo", { ph: "Mis carritos Vitastrong" }) +
+    F("Texto del botón en tu página de redes", "tienda.boton", { ph: "Ver mis carritos" }) + `</section>`;
+
   // CABECERA Y REDES
-  h += `<section class="sec"><h2>👤 Tu nombre y redes</h2><p class="sub">Los usuarios van sin la @.</p>` +
+  h += `<section class="sec"><span class="where">REDES</span><h2>👤 Tu nombre y redes</h2><p class="sub">Los usuarios van sin la @.</p>` +
     F("Nombre", "nombre") +
     F("Descripción", "descripcion", { t: "area", rows: 3 }) +
     card("yt", `<div class="sum"><b>YouTube</b><em class="chip">@${esc(S.youtube.usuario)}</em></div>`,
@@ -317,10 +337,10 @@ function render() {
     `</section>`;
 
   // MIEMBROS Y FINAL
-  h += `<section class="sec"><h2>⭐ Hazte miembro</h2>` +
+  h += `<section class="sec"><span class="where">REDES</span><h2>⭐ Hazte miembro</h2>` +
     T("Se ve en la web", "miembros.activa") +
     F("Título", "miembros.titulo") + F("Texto", "miembros.texto", { t: "area", rows: 3 }) + F("Texto del botón", "miembros.boton") + `</section>`;
-  h += `<section class="sec"><h2>📝 Texto del final</h2>` + F("Texto", "notaFinal", { t: "area", rows: 2 }) + `</section>`;
+  h += `<section class="sec"><span class="where">TIENDA</span><h2>📝 Texto del final</h2>` + F("Texto", "notaFinal", { t: "area", rows: 2 }) + `</section>`;
 
   app.innerHTML = h;
 }
@@ -355,7 +375,14 @@ app.addEventListener("toggle", e => {
   const k = e.target.dataset && e.target.dataset.k;
   if (k) e.target.open ? open.add(k) : open.delete(k);
 }, true);
-app.addEventListener("click", e => {
+app.addEventListener("click", async e => {
+  const c = e.target.closest("[data-copy]");
+  if (c) {
+    try { await navigator.clipboard.writeText(c.dataset.copy); }
+    catch { const ta = document.createElement("textarea"); ta.value = c.dataset.copy; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+    c.textContent = "¡Copiado!"; setTimeout(() => c.textContent = "Copiar", 1500);
+    return;
+  }
   const b = e.target.closest("[data-act]");
   if (!b) return;
   e.preventDefault();
